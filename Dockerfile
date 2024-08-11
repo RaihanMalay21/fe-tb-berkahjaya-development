@@ -1,5 +1,5 @@
 # membuat react application
-FROM node:v22-alpine AS builder
+FROM node:slim-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
