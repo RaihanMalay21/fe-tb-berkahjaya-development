@@ -89,9 +89,6 @@ function Poin() {
             <div style={style.containerTable}>
                 <Navbar judulNav={'Verification Poin'}/>
                 <div style={style.containerBodyTable}>
-                    <div>
-                        <p>hello world</p>
-                    </div>
                     <table class="table">
                         <thead>
                             <tr>
