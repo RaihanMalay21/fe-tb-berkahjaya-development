@@ -28,7 +28,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () =>  {
         try {
-            const response = await axios.get("http://localhost:8080/berkahjaya/users/data", { withCredentials : true })
+            const response = await axios.get("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/users/data", { withCredentials : true })
             setDataUser(response.data)
         } catch(error) {
             console.error(error.response);

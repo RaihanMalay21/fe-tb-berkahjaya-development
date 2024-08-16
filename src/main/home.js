@@ -42,7 +42,7 @@ function Home() {
     useEffect(() => {
         const fetchData = async () =>  {
             try {
-                const response = await axios.get("http://localhost:8080/berkahjaya/gifts/have/change/user", { withCredentials: true} )
+                const response = await axios.get("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/gifts/have/change/user", { withCredentials: true} )
                 setHadiahHaveChange(response.data);
             } catch(error) {
                 console.error(error.response);
@@ -69,7 +69,7 @@ function Home() {
         if (buttonLoginActive) {
             setTimeout(() => {
                 setButtonLoginActive(false);     
-            }, 2500)
+            }, 1500)
         }
     }, [buttonLoginActive])
 
@@ -93,7 +93,7 @@ function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get("http://localhost:8080/get/hadiah");
+                const response = await axios.get("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/get/hadiah");
                 setDataHadiah(response.data);
             } catch(error) {
                 console.error("error fetching data:", error)
@@ -142,7 +142,7 @@ function Home() {
                 withCredentials: true,
             }
 
-            const response = await axios.post("http://localhost:8080/berkahjaya/scan/poin", formData, config);
+            const response = await axios.post("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/scan/poin", formData, config);
 
             console.log(response.data);
 
@@ -186,7 +186,7 @@ function Home() {
                 withCredentials: true,
             }
 
-            const response = await axios.post("http://localhost:8080/berkahjaya/tukar/poin/hadiah", data, config)
+            const response = await axios.post("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/tukar/poin/hadiah", data, config)
             
             console.log(response.data);
             window.location.reload();

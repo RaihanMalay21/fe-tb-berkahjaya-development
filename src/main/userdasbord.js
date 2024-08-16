@@ -75,7 +75,7 @@ function DasbordUser() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get("http://localhost:8080/berkahjaya/user/proses/hadiah", {withCredentials: true})
+                const response = await axios.get("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/user/proses/hadiah", {withCredentials: true})
                 setDataProsesHadiah(response.data);
             }catch(error){
                 console.error(error.response);
@@ -131,7 +131,7 @@ function DasbordUser() {
         } 
 
         try {
-            const response = await axios.post( "http://localhost:8080/berkahjaya/change/password", {   
+            const response = await axios.post( "https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/change/password", {   
                     email: dataChangePassword.email,
                     passwordBefore: dataChangePassword.passwordBefore, 
                     passwordNew: dataChangePassword.passwordNew    
@@ -307,7 +307,7 @@ function DasbordUser() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get("http://localhost:8080/berkahjaya/proses/poin/verify", { withCredentials: true });
+                const response = await axios.get("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/proses/poin/verify", { withCredentials: true });
                 setDataProsesNota(response.data);
             } catch(error) {    
                 console.error(error)
@@ -330,7 +330,7 @@ function DasbordUser() {
                 ID: ID,
             }
 
-            const response = await axios.post("http://localhost:8080/berkahjaya/user/remove/nota/not/valid", data, config)
+            const response = await axios.post("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/user/remove/nota/not/valid", data, config)
             console.log(response.data);
 
             // Simpan status aktif ke localStorage

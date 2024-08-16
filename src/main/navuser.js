@@ -16,6 +16,13 @@ const NavbarUser = ({ onUploadNota }) => {
     const { dataUser, onLogin } = context || {};
     const contextLoginActive = useContext(ButtonLoginActiveContext);
     const buttonLoginActive = contextLoginActive;
+    const [ showLogin, setShowLogin ] = useState(false);
+
+    // mengatur button login, signup, dan logout supaya tidak di render sebelum
+    // data sudah sudah tersedia 
+    setTimeout(() => {
+        setShowLogin(true)
+    }, 300)
     // const [ dataUser, setDataUser ] = useState(null);
 
     // close div container-fill-nav-usersdata saat berada di user dasbord
@@ -143,18 +150,22 @@ const NavbarUser = ({ onUploadNota }) => {
                                 </form>
                             </div>
                         )} */}
-                        { !onLogin ? (
-                            <div class="navbar-registrations">
-                                <div class="button-registrations-navbar">
-                                    <button class="link" onClick={handleSignUpClick} style={style.navbuttondaftar}>Daftar</button>
-                                </div>
-                                <div class="button-registrations-navbar">
-                                    <button class="link" onClick={handleLoginClick} style={ buttonLoginActive ? { backgroundColor: 'rgb(15, 195, 15)', color: 'white', border: '1px solid rgb(15, 195, 15)'} : { backgroundColor: "#006664", color: "white", border: 'none'}}>Log In</button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div class="button-registrations-navbar">
-                                <button class="btn btn-danger" style={{ padding: '7.2px 25px' }} onClick={handleLogOut}>Logout</button>
+                        { showLogin && (
+                            <div>
+                                { !onLogin ? (
+                                    <div class="navbar-registrations">
+                                        <div class="button-registrations-navbar">
+                                            <button class="link" onClick={handleSignUpClick} style={style.navbuttondaftar}>Daftar</button>
+                                        </div>
+                                        <div class="button-registrations-navbar">
+                                            <button class="link" onClick={handleLoginClick} style={ buttonLoginActive ? { backgroundColor: 'rgb(15, 195, 15)', color: 'white', border: '1px solid rgb(15, 195, 15)'} : { backgroundColor: "#006664", color: "white", border: 'none'}}>Log In</button>
+                                        </div>
+                                    </div>
+                                ) :  (
+                                    <div class="button-registrations-navbar">
+                                        <button class="btn btn-danger" style={{ padding: '7.2px 25px' }} onClick={handleLogOut}>Logout</button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
