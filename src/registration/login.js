@@ -2,6 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React,{ useState } from "react"
 import { useNavigate } from 'react-router-dom';
 import "../App.css";
+import axios from "axios";
 
 
 function Login() {
@@ -26,34 +27,20 @@ function Login() {
 
     const submit = async (e) => {
         e.preventDefault();
-    
+
         try {
-            const response = await fetch('https://server-registry-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'include',
-                body: JSON.stringify({
-                    usernameORemail: formData.usernameORemail,
-                    password: formData.password
-                })
-            });
-    
-            if (!response.ok) {
-                // Jika respons tidak sukses, ambil pesan kesalahan dari respons
-                const errorResponseData = await response.json();
-                throw new Error(errorResponseData.message || 'Ada masalah dengan permintaan.');
+            const config = {
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                withCredentials: true,
             }
-            
-            // Gunakan metode json() pada respons untuk menguraikan konten respons menjadi format JSON
-            const responseData = await response.json();
-    
-            // Lakukan sesuatu dengan data respons yang telah diurai
-            console.log(response);
-            setTimeout(() => {
-                window.location.reload();
-            }, 10)
-            // navigate to home screen
-            navigate('/berkahjaya');
+
+            console.log(formData);
+
+            const response = await axios.post('https://server-registry-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/login', formData, config)
+            console.log(response.data);
+            navigate("/berkahjaya");
         } catch (error) {
             // Tangani kesalahan jika ada
             console.error('Ada kesalahan:', error.message);
@@ -99,7 +86,7 @@ function Login() {
                         <div class="main">
                             <div class="content">
                                 <h2 style={{ color: '#006664'}}>Log In</h2>
-                                <form action="" method="post" onSubmit={submit}>
+                                <form onSubmit={submit}>
                                     <input type="text" name="usernameORemail" placeholder="Username atau Password" required autoFocus="" onChange={HandleInput}/>
                                     <input type="password" name="password" placeholder="Password" required autoFocus="" onChange={HandleInput}/>
                                     <button class="btn-login" type="submit" style={{ backgroundColor: '#006664'}}>

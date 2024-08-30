@@ -69,10 +69,10 @@ const NavbarUser = ({ onUploadNota }) => {
         try {
             const response = await axios.get("http://localhost:8080/logout", { withCredentials: true });
             console.log(response.data);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1)
-            navigate("/berkahjaya");
+            // setTimeout(() => {
+            //     window.location.reload();
+            // }, 1)
+            // navigate("/berkahjaya");
         } catch(error) {
             console.error(error.response);
         }
