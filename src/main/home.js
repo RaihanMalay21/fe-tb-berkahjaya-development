@@ -93,7 +93,7 @@ function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/get/hadiah");
+                const response = await axios.get("https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/get/hadiah");
                 setDataHadiah(response.data);
             } catch(error) {
                 console.error("error fetching data:", error)
