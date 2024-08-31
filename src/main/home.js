@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import ClickOutSide from "../helper/clikOutSide";
 // export const ValueContext = createContext(); 
 
-const apiUrlCustomer = process.env.REACT_APP_CUSTOMER_API_URL;
 export const ButtonLoginActiveContext = createContext();
 
 function Home() {
@@ -41,7 +40,7 @@ function Home() {
     useEffect(() => {
         const fetchData = async () =>  {
             try {
-                const response = await axios.get(`${apiUrlCustomer}/berkahjaya/gifts/have/change/user`, { withCredentials: true} )
+                const response = await axios.get(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/gifts/have/change/user`, { withCredentials: true} )
                 setHadiahHaveChange(response.data);
             } catch(error) {
                 console.error(error.response);
@@ -92,7 +91,7 @@ function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get(`${apiUrlCustomer}/berkahjaya/get/hadiah`)
+                const response = await axios.get(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/get/hadiah`)
                 setDataHadiah(response.data);
             } catch(error) {
                 console.error("error fetching data:", error)
@@ -141,7 +140,7 @@ function Home() {
                 withCredentials: true,
             }
 
-            const response = await axios.post("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/scan/poin", formData, config);
+            const response = await axios.post("https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/scan/poin", formData, config);
 
             console.log(response.data);
 
@@ -185,7 +184,7 @@ function Home() {
                 withCredentials: true,
             }
 
-            const response = await axios.post("https://server-customer-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/tukar/poin/hadiah", data, config)
+            const response = await axios.post("https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/tukar/poin/hadiah", data, config)
             
             console.log(response.data);
             window.location.reload();
