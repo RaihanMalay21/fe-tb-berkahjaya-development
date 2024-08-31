@@ -14,7 +14,6 @@ export const ButtonLoginActiveContext = createContext();
 function Home() {
     const [dataHadiah, setDataHadiah] = useState([]);
     const navigate = useNavigate();
-    // const [ dataUser, setDataUser ] = useState(null);
     // const [ onLogin, setOnLogin ] = useState(true);
     const contextAllDataUsers = useContext(ValueContext);
     const { dataUser, onLogin } = contextAllDataUsers || {};
