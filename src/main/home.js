@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import ClickOutSide from "../helper/clikOutSide";
 // export const ValueContext = createContext(); 
 
-const apiUrlCustomer = process.env.REACT_APP_CUSTOMER_API_URL;
+const apiUrlCustomer = process.env.production.REACT_APP_CUSTOMER_API_URL;
 export const ButtonLoginActiveContext = createContext();
 
 function Home() {
