@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import ClickOutSide from "../helper/clikOutSide";
 // export const ValueContext = createContext(); 
 
-const apiUrlCustomer = process.env.production.REACT_APP_CUSTOMER_API_URL;
+const apiUrlCustomer = process.env.REACT_APP_CUSTOMER_API_URL;
 export const ButtonLoginActiveContext = createContext();
 
 function Home() {
@@ -92,7 +92,7 @@ function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try{
-                const response = await axios.get(`${apiUrlCustomer}/berkahjaya/get/hadiah`, {withCredentials: true})
+                const response = await axios.get(`${apiUrlCustomer}/berkahjaya/get/hadiah`)
                 setDataHadiah(response.data);
             } catch(error) {
                 console.error("error fetching data:", error)
