@@ -305,35 +305,37 @@ function Home() {
                     <div class="container-body-main">
                         <div class="container-main-fill">
                             <div class="row">
-                                { dataHadiah.map((data, _) => (
-                                    <div class="column-card">
-                                        <a onClick={(e) =>{ 
-                                             if (hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID)) {
-                                                e.preventDefault(); 
-                                                return; 
-                                              }
-                                            handleTukarHadiah(data.ID, data.nama_barang, data.poin, data.image, data.desc)}}>
-                                            <div className="card-hadiah" style={ hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID) ? {opacity: "0.5"} : {}}>
-                                                <div className="card-body-home">
-                                                    <img src={require(`../images/${data.image}`)} className="image-card-home" alt="..."/>
-                                                </div>
-                                                { hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID) && (
-                                                    <div style={ style.textComplate}>
-                                                        <h4 style={{  fontSize: '20px'}}>Complate</h4>
+                                { dataHadiah.length > 0 && (
+                                    dataHadiah.map((data, index) => (
+                                        <div class="column-card" key={index}>
+                                            <a onClick={(e) =>{ 
+                                                if (hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID)) {
+                                                    e.preventDefault(); 
+                                                    return; 
+                                                }
+                                                handleTukarHadiah(data.ID, data.nama_barang, data.poin, data.image, data.desc)}}>
+                                                <div className="card-hadiah" style={ hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID) ? {opacity: "0.5"} : {}}>
+                                                    <div className="card-body-home">
+                                                        <img src={require(`../images/${data.image}`)} className="image-card-home" alt="..."/>
                                                     </div>
-                                                )}
-                                                <div class="card-body">
-                                                    <h5 class="card-title" style={style.cardTitleStyle}>{data.nama_barang}</h5>
-                                                    <div>
-                                                        <p class="text-start mt-3">{data.poin} Poin</p>
-                                                        <p class="text-start">Periode 26-01-2026</p> 
-                                                        <p class="text-start" style={{ color: "#006664"}}>Bebas Pengambilan</p>
+                                                    { hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID) && (
+                                                        <div style={ style.textComplate}>
+                                                            <h4 style={{  fontSize: '20px'}}>Complate</h4>
+                                                        </div>
+                                                    )}
+                                                    <div class="card-body">
+                                                        <h5 class="card-title" style={style.cardTitleStyle}>{data.nama_barang}</h5>
+                                                        <div>
+                                                            <p class="text-start mt-3">{data.poin} Poin</p>
+                                                            <p class="text-start">Periode 26-01-2026</p> 
+                                                            <p class="text-start" style={{ color: "#006664"}}>Bebas Pengambilan</p>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                )) }
+                                            </a>
+                                        </div>
+                                    )) 
+                                )}
                             </div>
                         </div>
                     </div>
