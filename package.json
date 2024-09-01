@@ -2,6 +2,7 @@
   "name": "static",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
