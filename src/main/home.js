@@ -305,7 +305,7 @@ function Home() {
                     <div class="container-body-main">
                         <div class="container-main-fill">
                             <div class="row">
-                                { dataHadiah.length > 0 && (
+                                { Array.isArray(dataHadiah) && dataHadiah.length > 0 ? (
                                     dataHadiah.map((data, index) => (
                                         <div class="column-card" key={index}>
                                             <a onClick={(e) =>{ 
@@ -335,6 +335,8 @@ function Home() {
                                             </a>
                                         </div>
                                     )) 
+                                ) : (
+                                    <p>No items available</p>
                                 )}
                             </div>
                         </div>
