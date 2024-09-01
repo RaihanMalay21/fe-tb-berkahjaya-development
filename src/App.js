@@ -18,9 +18,12 @@ import VerificationPoin from './admin/verifikasiPoin/verify';
 import React, { useState, useEffect, createContext} from 'react';
 import axios from 'axios';
 
+// const apiCustonerUrl = import.meta.env.VITE_API_CUSTOMER_URLL;
 export const ValueContext = createContext(); 
 
 function App() {
+  console.log(import.meta.env);
+
   const [ dataUser, setDataUser ] = useState(null);
   const [ onLogin, setOnLogin ] = useState(true);
 
@@ -28,7 +31,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () =>  {
         try {
-            const response = await axios.get("/berkahjaya/users/data", { withCredentials : true })
+            const response = await axios.get(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/users/data`, { withCredentials : true })
             setDataUser(response.data)
         } catch(error) {
             console.error(error.response);
