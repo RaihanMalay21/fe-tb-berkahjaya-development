@@ -16,38 +16,63 @@ import ScrollToTop from './helper/ScrollToTop';
 import Poin from './admin/verifikasiPoin/poin';
 import VerificationPoin from './admin/verifikasiPoin/verify';
 import React, { useState, useEffect, createContext} from 'react';
-import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUsers } from './actions/actionsGet';
+
 
 // const apiCustonerUrl = import.meta.env.VITE_API_CUSTOMER_URLL;
 export const ValueContext = createContext(); 
 
 function App() {
-  console.log(import.meta.env);
-
-  const [ dataUser, setDataUser ] = useState(null);
+  // const [ dataUser, setDataUser ] = useState(null);
+  const dispatch = useDispatch();
   const [ onLogin, setOnLogin ] = useState(true);
 
-  // get data user form server
+  const { users, loading, error, errorStatusCode, source } = useSelector((state) => state.usersState); 
+
+  // Memanggil fetchUsers sekali saat komponen pertama kali di-mount
   useEffect(() => {
-    const fetchData = async () =>  {
-        try {
-            const response = await axios.get(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/users/data`, { withCredentials : true })
-            setDataUser(response.data)
-        } catch(error) {
-            console.error(error.response);
-            if (error.response && error.response.status === 401) {
-                setOnLogin(false);
-            }
-        }
+    dispatch(fetchUsers());
+  }, [dispatch]);
+
+  // Cek error 401 ketika error berubah
+  useEffect(() => {
+    if (errorStatusCode === 401) {  // status kecil, bukan Status
+      setOnLogin(false);
     }
-    fetchData();
-  }, []);
+  }, [errorStatusCode]);
+ 
+  // console.log(source);
+  // console.log(error);
+  // console.log(errorStatusCode)
+  // useEffect(() => {
+  //   dispatch(fetchUsers());
+  //   console.log(error);
+  //   if (error && error.Status === 401) {
+  //     setOnLogin(false);
+  //   }
+  // }, [dispatch, error, loading])
+  // get data user form server
+  // useEffect(() => {
+  //   const fetchData = async () =>  {
+  //       try {
+  //           const response = await axios.get(`http://localhost:8080/customer/berkahjaya/users/data`, { withCredentials : true })
+  //           setDataUser(response.data)
+  //       } catch(error) {
+  //           console.error(error.response);
+  //           if (error.response && error.response.status === 401) {
+  //               setOnLogin(false);
+  //           }
+  //       }
+  //   }
+  //   fetchData();
+  // }, []);
 
   return (
     <Router>
       <div>
         <ScrollToTop/>
-        < ValueContext.Provider value={{ dataUser, onLogin }}>
+        < ValueContext.Provider value={{ users, onLogin }}>
           <Routes>
             <Route path='/signup' element={<SignUp/>} />
             <Route path='/login' element={<Login/>} />

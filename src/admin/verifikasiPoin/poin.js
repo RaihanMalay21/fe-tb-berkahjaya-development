@@ -16,7 +16,7 @@ function Poin() {
                     // mengatur axios untuk selalu mengirim cookie
                     axios.defaults.withCredentials = true;
 
-                    const response = await axios.get("http://localhost:8080/berkahjaya/adminside/pengajuan/poin");
+                    const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin");
 
                     setValue(response.data);
                     console.log("Succesfully fetched data");

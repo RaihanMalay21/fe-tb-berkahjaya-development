@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ValueContext } from "../App";
 import { ButtonLoginActiveContext } from "./home";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { Logout, fetchHadiahsHasExchange } from "../actions/actionsGet";
 
 
 const NavbarUser = ({ onUploadNota }) => {
@@ -13,10 +15,11 @@ const NavbarUser = ({ onUploadNota }) => {
     const [ isDasbor, setIsDasbor ] = useState(false);
     const [ beforeLogin, setBeforeLogin ] = useState(false);
     const context = useContext(ValueContext);
-    const { dataUser, onLogin } = context || {};
+    const { users, onLogin } = context || {};
     const contextLoginActive = useContext(ButtonLoginActiveContext);
     const buttonLoginActive = contextLoginActive;
     const [ showLogin, setShowLogin ] = useState(false);
+    const dispatch = useDispatch()
 
     // mengatur button login, signup, dan logout supaya tidak di render sebelum
     // data sudah sudah tersedia 
@@ -65,40 +68,27 @@ const NavbarUser = ({ onUploadNota }) => {
     };
 
     // handle log Out
+    const { message, error } = useSelector((state) => state.logoutState);
+
     const handleLogOut = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/logout", { withCredentials: true });
-            console.log(response.data);
-            // setTimeout(() => {
-            //     window.location.reload();
-            // }, 1)
-            // navigate("/berkahjaya");
+            await dispatch(Logout());  // unwrap untuk menangani error jika ada
+            console.log(message);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1)
+            navigate("/berkahjaya");
         } catch(error) {
-            console.error(error.response);
+            console.error("Logout failed", error);
         }
     }
 
-    // // get data hadiah from server 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const response = await axios.get("http://localhost:8080/berkahjaya/users/data", { withCredentials: true });
-    //             setDataUser(response.data);
-    //         } catch (error) {
-    //             console.error("error fetching data:", error);
-    //         }
-    //     };
-    //     fetchData();
-    // }, []);
-
     // set tampilkan container-fill-nav-usersdata jika user telah login
     useEffect(() => {
-        if (dataUser) {
+        if (onLogin) {
             setBeforeLogin(true);
         }
-    }, [dataUser]);
-
-
+    }, [users]);
 
     const style = {
         navbuttondaftar: {
@@ -169,13 +159,13 @@ const NavbarUser = ({ onUploadNota }) => {
                             </div>
                         )}
                     </div>
-                    {!isDasbor && beforeLogin && (
+                    { onLogin && !isDasbor && (
                         <div class="container-fill-nav-usersdata">
-                            <div onClick={() => handleDasborUserClick(dataUser.username, dataUser.email, dataUser.whatshapp, dataUser.poin)} className="nav-username" style={{ display: "flex"}}>
+                            <div onClick={() => handleDasborUserClick(users.username, users.email, users.whatshapp, users.poin)} className="nav-username" style={{ display: "flex"}}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#006664" class="bi bi-person" viewBox="0 0 16 16" style={style.logoUnderNavsvg}>
                                 <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/>
                                 </svg>
-                                { dataUser.username }
+                                { users.username }
                             </div>
                             <div onClick={onUploadNota} className="nav-upload" style={{ display: "flex"}}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#006664" class="bi bi-box-arrow-in-down" viewBox="0 0 16 16" style={style.logoUnderNavsvg}>
@@ -190,7 +180,7 @@ const NavbarUser = ({ onUploadNota }) => {
                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                                 <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
                                 </svg>
-                                { dataUser.poin }
+                                { users.poin }
                             </div>
                         </div>
                     )}

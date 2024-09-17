@@ -23,7 +23,7 @@ function Barang() {
                     axios.defaults.withCredentials = true;
 
                     // Make the GET request to the server with authorization headers
-                    const response = await axios.get("http://localhost:8080/berkahjaya/adminside/barang");
+                    const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/barang");
 
                     // Update the state with the response data
                     setValue(response.data);
@@ -61,7 +61,7 @@ function Barang() {
         try {
           const formData = new FormData();
           formData.append('key', searchTerm);
-          const response = await axios.post("http://localhost:8080/berkahjaya/adminside/barang", formData);
+          const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang", formData);
           console.log(response.data);
           setValue(response.data); // Menyimpan hasil pencarian ke dalam state
         } catch(error) {
@@ -88,7 +88,7 @@ function Barang() {
             withCredentials: true,
         };
 
-        axios.post('http://localhost:8080/berkahjaya/adminside/barang/deletebarang', data, config)
+        axios.post('http://localhost:8080/admin/berkahjaya/adminside/barang/deletebarang', data, config)
         .then(response => {
             console.log('Response:', response.data);
             window.location.reload();

@@ -6,18 +6,18 @@ import Footer from "./footer";
 import { ValueContext } from "../App";
 import { useNavigate } from "react-router-dom";
 import ClickOutSide from "../helper/clikOutSide";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchHadiah, fetchHadiahsHasExchange } from "../actions/actionsGet";
+import { postInputNota, postExchangeGift } from "../actions/actionsPost"
 // export const ValueContext = createContext(); 
 // const apiCustonerUrl = import.meta.env.VITE_API_CUSTOMER_URL;
 export const ButtonLoginActiveContext = createContext();
 
 function Home() {
-    console.log(import.meta.env);
-
-    const [dataHadiah, setDataHadiah] = useState([]);
     const navigate = useNavigate();
     // const [ onLogin, setOnLogin ] = useState(true);
     const contextAllDataUsers = useContext(ValueContext);
-    const { dataUser, onLogin } = contextAllDataUsers || {};
+    const { users, onLogin } = contextAllDataUsers || {};
     const [ buttonLoginActive, setButtonLoginActive ] = useState(false);
     // image upload nota
     const [image, setImage] = useState(null);
@@ -34,23 +34,18 @@ function Home() {
     const [ data, setData ] = useState();
     // useRef untuk mengatatur model close when user  clik outside modal
     const modalRef = useRef(null);
-    const [ hadiahHaveChange, setHadiahHaveChange ] = useState([]);
+    const [spinner, setSpinner] = useState(false);
+    // redux 
+    const dispatch = useDispatch(); 
 
     ClickOutSide(modalRef, () => setAlertEnsureChange(false));
 
     // mengambil data hadiah yang telah di tukar dan tidak bisa di tukar kembali
+    const { hadiahsHasExchange, loadingExchange, errorExchange } = useSelector((state) => state.hadiahsHasExchangeState);
     useEffect(() => {
-        const fetchData = async () =>  {
-            try {
-                const response = await axios.get(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/gifts/have/change/user`, { withCredentials: true} )
-                setHadiahHaveChange(response.data);
-            } catch(error) {
-                console.error(error.response);
-            }
-        }
-        fetchData();
-    }, [])
-    console.log(hadiahHaveChange)
+        dispatch(fetchHadiahsHasExchange());
+    }, [dispatch])
+    
     // const handleClickOutside = (event) => {
     //     if( modalRef.current && !modalRef.current.contains(event.target)) {
     //         setAlertEnsureChange(false);
@@ -73,34 +68,14 @@ function Home() {
         }
     }, [buttonLoginActive])
 
-    // // get data user form server
-    // useEffect(() => {
-    //     const fetchData = async () =>  {
-    //         try {
-    //             const response = await axios.get("http://localhost:8080/berkahjaya/users/data", { withCredentials : true })
-    //             setDataUser(response.data)
-    //         } catch(error) {
-    //             console.error(error.response);
-    //             if (error.response && error.response.status === 401) {
-    //                 setOnLogin(false);
-    //             }
-    //         }
-    //     }
-    //     fetchData();
-    // }, []);
 
     // get data hadiah from server
+    const { hadiahs, loading, error } = useSelector((state) => state.hadiahsState)
+
     useEffect(() => {
-        const fetchData = async () => {
-            try{
-                const response = await axios.get(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/get/hadiah`, {withCredentials: true})
-                setDataHadiah(response.data);
-            } catch(error) {
-                console.error("error fetching data:", error)
-            }
-        };
-        fetchData();
-    }, []);
+        dispatch(fetchHadiah())
+    }, [dispatch])
+
 
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
@@ -131,77 +106,79 @@ function Home() {
     
      
     // submit nota 
+    const {  messageSuccess, loadingInputNota, statusCode, messageError, errorInputNota } = useSelector((state) => state.inputNotaState);
     const submitNota = async (event) => {
         event.preventDefault();
-
-        try{
-            const config = {
-                headers : {
-                    "Content-Type": "multipart/form-data"
-                },
-                withCredentials: true,
-            }
-
-            const response = await axios.post(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/scan/poin`, formData, config);
-
-            console.log(response.data);
-
+        dispatch(postInputNota(formData));
+    }
+    // useEffect memantau perubahan data response yang ada di redux dari submit nota 
+    useEffect(() => {
+        if (statusCode === 200) {
             setImage(null);
             setShowModal(false);
             setNotaAlertSucces(true);
-            setNotaAlertMessageSucces(response.data.message);
+            setNotaAlertMessageSucces(messageSuccess);
 
             setTimeout(() => {
                 setNotaAlertSucces(false);
             }, 2500);
-        } catch(error) {
-            console.error(error);
+        } else if (statusCode === 401) {
+            navigate('/login');
+            return
+        } else if (errorInputNota) {
             setImage(null)
-
-            // Penanganan kesalahan khusus
-            if (error.response && error.response.status === 401) {
-                // Menavigasi ke halaman login jika tidak terotorisasi
-                navigate('/login');
-                return; // Menghentikan eksekusi kode selanjutnya
-            }
-
             setShowModal(false);
             setNotaAlertFail(true);
-            setNotaAlertMessageFail(error.response.data.message);
-
+            setNotaAlertMessageFail(messageError);
             setTimeout(() => {
                 setNotaAlertFail(false);
             }, 2500);
         }
-    } 
+    }, [messageSuccess, statusCode, messageError])
 
     // handle untuk menukarkan poin menjadi hadiah
+    const { successExchangeGift, errorExchangeGift } = useSelector((state) => state.exchangeGiftState);
     const handlePoinChangeToGift = async () => {
-        console.log(data);
-        try {
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            }
-
-            const response = await axios.post(`https://server-customer-tb-berkah-jaya-750892348569.us-central1.run.app/berkahjaya/tukar/poin/hadiah`, data, config)
-            
-            console.log(response.data);
-            window.location.reload();
-        } catch(error) {
-            console.error(error)
-        }
-
+        dispatch(postExchangeGift(data));
     }
+
+    console.log(successExchangeGift);
+    console.log(errorExchangeGift);
+    useEffect(() => {
+        if(successExchangeGift) {
+            window.location.reload();
+        };
+        if(errorExchangeGift) {
+            console.error(errorExchangeGift)
+        }
+    }, [successExchangeGift, errorExchangeGift]);
+
+    // const handlePoinChangeToGift = async () => {
+    //     console.log(data);
+    //     try {
+    //         const config = {
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             withCredentials: true,
+    //         }
+
+    //         const response = await axios.post(`https://localhost:8080/customer/berkahjaya/tukar/poin/hadiah`, data, config)
+            
+    //         console.log(response.data);
+    //         window.location.reload();
+    //     } catch(error) {
+    //         console.error(error)
+    //     }
+
+    // }
 
     // handle tukar hadiah
     const handleTukarHadiah = (id, nama_barang, poin, image, desc) => {
         if (!onLogin) {
             setButtonLoginActive(true);
             return
-        } else if(dataUser.poin < poin) {
+        } else if(users.poin < poin) {
             setAlertPoinNotEnough(true);
             setTimeout(() => {
                 setAlertPoinNotEnough(false);
@@ -260,6 +237,13 @@ function Home() {
     return (
         <ButtonLoginActiveContext.Provider value={ buttonLoginActive }>
             <div>
+                { spinner && (
+                    <div style={{position: 'fixed', height: '100vh', width: '100%', backgroundColor: 'rgb(0, 0, 0, 0.2', zIndex: '99999999'}}>
+                        <div class="spinner-border light" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                )}
                 { alertPoinNotEnough && (
                     <div class="alert" role="alert" style={{ border: '1px solid white', boxShadow: '0 4px 8px rgba(220, 53, 69, 1)',zIndex: '9999',backgroundColor: '#dc3545', color: 'white', position: 'fixed', top: '30%', width: '16rem', right: "50%", left: '42%', textAlign: "center"}}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" style={{ marginRight: '20px'}} fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
@@ -307,20 +291,20 @@ function Home() {
                     <div class="container-body-main">
                         <div class="container-main-fill">
                             <div class="row">
-                                { Array.isArray(dataHadiah) && dataHadiah.length > 0 ? (
-                                    dataHadiah.map((data, index) => (
+                                { Array.isArray(hadiahs) && hadiahs.length > 0 ? (
+                                    hadiahs.map((data, index) => (
                                         <div class="column-card" key={index}>
                                             <a onClick={(e) =>{ 
-                                                if (hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID)) {
+                                                if (hadiahsHasExchange.some(hadiah => hadiah.HadiahID === data.ID)) {
                                                     e.preventDefault(); 
                                                     return; 
                                                 }
                                                 handleTukarHadiah(data.ID, data.nama_barang, data.poin, data.image, data.desc)}}>
-                                                <div className="card-hadiah" style={ hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID) ? {opacity: "0.5"} : {}}>
+                                                <div className="card-hadiah" style={ hadiahsHasExchange.some(hadiah => hadiah.HadiahID === data.ID) ? {opacity: "0.5"} : {}}>
                                                     <div className="card-body-home">
                                                         <img src={require(`../images/${data.image}`)} className="image-card-home" alt="..."/>
                                                     </div>
-                                                    { hadiahHaveChange.some(hadiah => hadiah.HadiahID === data.ID) && (
+                                                    { hadiahsHasExchange.some(hadiah => hadiah.HadiahID === data.ID) && (
                                                         <div style={ style.textComplate}>
                                                             <h4 style={{  fontSize: '20px'}}>Complate</h4>
                                                         </div>

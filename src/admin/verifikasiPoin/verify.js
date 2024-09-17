@@ -40,7 +40,7 @@ function VerificationPoin() {
             };
             const formData = new FormData();
             formData.append('key', keySearch);
-            const response = await axios.post("http://localhost:8080/berkahjaya/adminside/barang", formData, config);
+            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang/search", formData, config);
             console.log(response.data);
             setSearchBarang(response.data);
 
@@ -185,7 +185,7 @@ function VerificationPoin() {
             withCredentials: true,
         };
 
-        axios.post('http://localhost:8080/berkahjaya/adminside/pengajuan/poin/verify/cancel', data, config)
+        axios.post('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/verify/cancel', data, config)
         .then(response => {
             console.log('Response:', response.data);
             navigate("/berkahjaya/adminside/poin");
@@ -235,7 +235,7 @@ function VerificationPoin() {
                 withCredentials: true,
             };
 
-            const response = await axios.post('http://localhost:8080/berkahjaya/adminside/pengajuan/poin/verify', data, config);
+            const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/verify', data, config);
             console.log(response.data);
             navigate("/berkahjaya/adminside/poin")
         } catch(error) {

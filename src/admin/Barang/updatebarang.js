@@ -88,7 +88,7 @@ function UpdateBarang() {
                 },
                 withCredentials : true,
             };
-            axios.post('http://localhost:8080/berkahjaya/adminside/barang/updatebarang', formValue, config)
+            axios.put('http://localhost:8080/admin/berkahjaya/adminside/barang/updatebarang', formValue, config)
                 .then(response => {
                     console.log(response.data);
                     // redirect ke halaman barang

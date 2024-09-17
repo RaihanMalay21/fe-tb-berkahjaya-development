@@ -21,7 +21,7 @@ function DeleteBarang(id, nama_barang, harga_barang, harga_beli, image, kode) {
         },
     };
 
-    axios.post('http://localhost:8080/berkahjaya/adminside/barang/deletebarang', data, config)
+    axios.delete('http://localhost:8080/admin/berkahjaya/adminside/barang/deletebarang', data, config)
     .then(respose => {
         console.log(respose.data);
 

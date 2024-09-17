@@ -18,7 +18,7 @@ function ProsesHadiah() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get("http://localhost:8080/berkahjaya/adminside/pengajuan/hadiah", { withCredentials: true})
+                const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/hadiah", { withCredentials: true})
                 setHadiahUser(response.data);
                 console.log(response.data);
             } catch(error) {
@@ -75,7 +75,7 @@ function ProsesHadiah() {
             }
             setModalGiftArrive(false);
             setSpinners(true);
-            const response = await axios.post("http://localhost:8080/berkahjaya/adminside/pengajuan/poin/sendmsgggiftsarrive", data, config)
+            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/sendmsgggiftsarrive", data, config)
             console.log(response.data);
             window.location.reload();
         } catch(error) {
@@ -116,7 +116,7 @@ function ProsesHadiah() {
             }
             setModalGiftFineshed(false);
             setSpinners(true);
-            const response = await axios.post("http://localhost:8080/berkahjaya/adminside/pengajuan/poin/finished", data, config)
+            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/finished", data, config)
             console.log(response.data);
             window.location.reload();
         } catch(error) {

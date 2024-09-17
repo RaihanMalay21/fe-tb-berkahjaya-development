@@ -45,7 +45,7 @@ function InputHadiah() {
   
       try {
         // kirim data menggunakan Axios
-        const response = await axios.post('http://localhost:8080/berkahjaya/adminside/hadiah/inputhadiah', formData, {
+        const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah/inputhadiah', formData, {
           headers : {
             'Content-Type' : 'multipart/form-data'
           },

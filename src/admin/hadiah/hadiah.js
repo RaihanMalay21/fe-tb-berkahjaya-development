@@ -15,7 +15,7 @@ function Hadiah() {
         const fetchData = async () => {
           try {
             axios.defaults.withCredentials = true;
-            const response = await axios.get("http://localhost:8080/berkahjaya/adminside/hadiah");
+            const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/hadiah");
             setDataList(response.data);
           } catch (error) {
             console.error("Error fetching data:", error);
@@ -53,7 +53,7 @@ function Hadiah() {
       try {
         const formdata = new FormData();
         formdata.append('key', searcTerm);
-        const response = await axios.post('http://localhost:8080/berkahjaya/adminside/hadiah', formdata);
+        const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah', formdata);
         setDataList((await response).data);
       } catch(error) {
         console.error(error);
@@ -77,7 +77,7 @@ function Hadiah() {
         withCredentials: true,
       }
 
-      axios.post('http://localhost:8080/berkahjaya/adminside/hadiah/deletehadiah', data, config)
+      axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah/deletehadiah', data, config)
       .then(response => {
         console.log('Response:', response.data);
         window.location.reload();

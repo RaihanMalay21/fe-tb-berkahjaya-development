@@ -48,7 +48,7 @@ function InputBarang() {
                 },
                 withCredentials: true,
             };
-            const response = await axios.post("http://localhost:8080/berkahjaya/adminside/barang/inputbarang", formData, config);
+            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang/inputbarang", formData, config);
 
             // ambil message response succes
             setMessage(response.data);

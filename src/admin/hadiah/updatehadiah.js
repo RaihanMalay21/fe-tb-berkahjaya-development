@@ -77,7 +77,7 @@ function UpdateHadiah() {
         withCredentials: true,
       };
 
-      axios.post('http://localhost:8080/berkahjaya/adminside/hadiah/updatehadiah', formValue, config)
+      axios.put('http://localhost:8080/admin/berkahjaya/adminside/hadiah/updatehadiah', formValue, config)
         .then(response => {
           console.log(response);
           // melakukan redirect

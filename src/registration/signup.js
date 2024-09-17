@@ -89,7 +89,7 @@ function SignUp() {
         }
 
         try{
-            const response = await fetch('https://server-registry-tb-berkah-jaya-igcfjdj5fa-uc.a.run.app/berkahjaya/signup', {
+            const response = await fetch('https://localhost:8080/access/berkahjaya/signup', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
