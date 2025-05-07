@@ -1,15 +1,19 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 // import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "../../App.css";
 import formatCurrency from '../../helper/formatCurrency';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactFileReader from "react-file-reader"
 import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { putUpdateBarang } from '../../actions/actionPut';
+import { updateBarangSlice } from "../../reducers/reducers";
 
 function UpdateBarang() {
     // mengambil value dari uselocation redirect from '/adminside/barang'
     const location = useLocation();
+    const dispatch = useDispatch();
     const {id, nama_barang, harga_barang, harga_beli, image, kode} = location.state;
 
     // usestate untuk menyimpan value untuk dikirim ke server
@@ -22,7 +26,6 @@ function UpdateBarang() {
         path_image: image,
         kode: kode
     })
-    console.log(formValue)
 
     // usestate untuk menyiman file reader 
     const [readfile, setreadfile] = useState({
@@ -73,8 +76,10 @@ function UpdateBarang() {
     // inialisasi fungsi redairect
     const navigate = useNavigate()
     //post ke server
-    const handleUpdate = () => {
+    const { success, error, statusErr } = useSelector((state) => state.updateBarangState);
+    const { resetUpdateBarang } = updateBarangSlice.actions;
 
+    const handleUpdate = () => {
         // Melepas referensi gambar dari DOM sebelum menghapusnya
         const imgElement = document.getElementById('image-preview');
         if (imgElement) {
@@ -82,31 +87,47 @@ function UpdateBarang() {
         }
 
         setTimeout(() => {
-            const config = {
-                headers : {
-                  'Content-Type' : 'multipart/form-data'  
-                },
-                withCredentials : true,
-            };
-            axios.put('http://localhost:8080/admin/berkahjaya/adminside/barang/updatebarang', formValue, config)
-                .then(response => {
-                    console.log(response.data);
-                    // redirect ke halaman barang
-                    navigate("/berkahjaya/adminside/barang");
-                })
-                .catch(error => {
-                    console.error(error);
+            dispatch(putUpdateBarang(formValue));
+            // const config = {
+            //     headers : {
+            //       'Content-Type' : 'multipart/form-data'  
+            //     },
+            //     withCredentials : true,
+            // };
+            // axios.put('http://localhost:8080/admin/berkahjaya/adminside/barang/updatebarang', formValue, config)
+            //     .then(response => {
+            //         console.log(response.data);
+            //         // redirect ke halaman barang
+            //         navigate("/berkahjaya/adminside/barang");
+            //     })
+            //     .catch(error => {
+            //         console.error(error);
     
-                    // Penanganan kesalahan khusus
-                    if (error.response && error.response.status === 401) {
-                        // Menavigasi ke halaman login jika tidak terotorisasi
-                        navigate('/login');
-                        return; // Menghentikan eksekusi kode selanjutnya
-                    };
-                })
+            //         // Penanganan kesalahan khusus
+            //         if (error.response && error.response.status === 401) {
+            //             // Menavigasi ke halaman login jika tidak terotorisasi
+            //             navigate('/login');
+            //             return; // Menghentikan eksekusi kode selanjutnya
+            //         };
+            //     })
         }, 100)
-
     };
+
+    // useEffect untuk menghandle response dari handleUpdate
+    useEffect(() => {
+        if (success) {
+            console.log(success);
+            dispatch(resetUpdateBarang());
+            navigate("/berkahjaya/adminside/barang");
+        }
+        if (error) {
+            console.error(error);
+            if (statusErr === 401) {
+                navigate('/login');
+                return; 
+            };
+        }
+    }, [success, error, statusErr]);
 
     const style = {
         NameInput: {

@@ -44,8 +44,8 @@ function Home() {
     const { hadiahsHasExchange, loadingExchange, errorExchange } = useSelector((state) => state.hadiahsHasExchangeState);
     useEffect(() => {
         dispatch(fetchHadiahsHasExchange());
-    }, [dispatch])
-    
+    }, [dispatch]);
+
     // const handleClickOutside = (event) => {
     //     if( modalRef.current && !modalRef.current.contains(event.target)) {
     //         setAlertEnsureChange(false);
@@ -62,19 +62,22 @@ function Home() {
     // untuk mengatur lama dari activenya dari buttonLoginActive
     useEffect(() => {
         if (buttonLoginActive) {
-            setTimeout(() => {
+            const timeout = setTimeout(() => {
                 setButtonLoginActive(false);     
-            }, 1500)
+            }, 1500);
+            return () => clearTimeout(timeout);
         }
-    }, [buttonLoginActive])
+    }, [buttonLoginActive]);
 
 
     // get data hadiah from server
     const { hadiahs, loading, error } = useSelector((state) => state.hadiahsState)
 
     useEffect(() => {
-        dispatch(fetchHadiah())
-    }, [dispatch])
+        if (!hadiahs || hadiahs.length === 0) {
+            dispatch(fetchHadiah());
+        }
+    }, [dispatch, hadiahs]);
 
 
     const handleImageUpload = (event) => {
@@ -119,22 +122,26 @@ function Home() {
             setNotaAlertSucces(true);
             setNotaAlertMessageSucces(messageSuccess);
 
-            setTimeout(() => {
+            const timeout = setTimeout(() => {
                 setNotaAlertSucces(false);
             }, 2500);
+
+            return () => clearTimeout(timeout);
         } else if (statusCode === 401) {
             navigate('/login');
-            return
         } else if (errorInputNota) {
-            setImage(null)
+            setImage(null);
             setShowModal(false);
             setNotaAlertFail(true);
             setNotaAlertMessageFail(messageError);
-            setTimeout(() => {
+
+            const timeout = setTimeout(() => {
                 setNotaAlertFail(false);
             }, 2500);
+
+            return () => clearTimeout(timeout);
         }
-    }, [messageSuccess, statusCode, messageError])
+    }, [statusCode, errorInputNota, messageSuccess, messageError, navigate]);
 
     // handle untuk menukarkan poin menjadi hadiah
     const { successExchangeGift, errorExchangeGift } = useSelector((state) => state.exchangeGiftState);
@@ -145,11 +152,11 @@ function Home() {
     console.log(successExchangeGift);
     console.log(errorExchangeGift);
     useEffect(() => {
-        if(successExchangeGift) {
+        if (successExchangeGift) {
             window.location.reload();
-        };
-        if(errorExchangeGift) {
-            console.error(errorExchangeGift)
+        }
+        if (errorExchangeGift) {
+            console.error(errorExchangeGift);
         }
     }, [successExchangeGift, errorExchangeGift]);
 
@@ -290,40 +297,44 @@ function Home() {
 
                     <div class="container-body-main">
                         <div class="container-main-fill">
-                            <div class="row">
-                                { Array.isArray(hadiahs) && hadiahs.length > 0 ? (
-                                    hadiahs.map((data, index) => (
-                                        <div class="column-card" key={index}>
-                                            <a onClick={(e) =>{ 
-                                                if (hadiahsHasExchange.some(hadiah => hadiah.HadiahID === data.ID)) {
-                                                    e.preventDefault(); 
-                                                    return; 
-                                                }
-                                                handleTukarHadiah(data.ID, data.nama_barang, data.poin, data.image, data.desc)}}>
-                                                <div className="card-hadiah" style={ hadiahsHasExchange.some(hadiah => hadiah.HadiahID === data.ID) ? {opacity: "0.5"} : {}}>
-                                                    <div className="card-body-home">
-                                                        <img src={require(`../images/${data.image}`)} className="image-card-home" alt="..."/>
-                                                    </div>
-                                                    { hadiahsHasExchange.some(hadiah => hadiah.HadiahID === data.ID) && (
-                                                        <div style={ style.textComplate}>
-                                                            <h4 style={{  fontSize: '20px'}}>Complate</h4>
-                                                        </div>
-                                                    )}
-                                                    <div class="card-body">
-                                                        <h5 class="card-title" style={style.cardTitleStyle}>{data.nama_barang}</h5>
-                                                        <div>
-                                                            <p class="text-start mt-3">{data.poin} Poin</p>
-                                                            <p class="text-start">Periode 26-01-2026</p> 
-                                                            <p class="text-start" style={{ color: "#006664"}}>Bebas Pengambilan</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </a>
+                        <div class="row">
+                            {hadiahs && Array.isArray(hadiahs) && hadiahs.length > 0 ? (
+                                hadiahs.map((data, index) => (
+                                <div class="column-card" key={index}>
+                                    <a onClick={(e) => { 
+                                    // Tambahkan fallback array kosong dengan ||
+                                    if ((hadiahsHasExchange || []).some(hadiah => hadiah.HadiahID === data.ID)) {
+                                        e.preventDefault(); 
+                                        return; 
+                                    }
+                                    handleTukarHadiah(data.ID, data.nama_barang, data.poin, data.image, data.desc)}}
+                                    >
+                                    {/* Tambahkan fallback array kosong di style */}
+                                    <div className="card-hadiah" style={(hadiahsHasExchange || []).some(hadiah => hadiah.HadiahID === data.ID) ? {opacity: "0.5"} : {}}>
+                                        <div className="card-body-home">
+                                        <img src={require(`../images/${data.image}`)} className="image-card-home" alt="..."/>
                                         </div>
-                                    )) 
-                                ) : (
-                                    <p>No items available</p>
-                                )}
+                                        {/* Tambahkan fallback array kosong di conditional rendering */}
+                                        {(hadiahsHasExchange || []).some(hadiah => hadiah.HadiahID === data.ID) && (
+                                        <div style={style.textComplate}>
+                                            <h4 style={{ fontSize: '20px' }}>Complate</h4>
+                                        </div>
+                                        )}
+                                        <div class="card-body">
+                                        <h5 class="card-title" style={style.cardTitleStyle}>{data.nama_barang}</h5>
+                                        <div>
+                                            <p class="text-start mt-3">{data.poin} Poin</p>
+                                            <p class="text-start">Periode 26-01-2026</p> 
+                                            <p class="text-start" style={{ color: "#006664" }}>Bebas Pengambilan</p>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </a>
+                                </div>
+                                )) 
+                            ) : (
+                                <p>No items available</p>
+                            )}
                             </div>
                         </div>
                     </div>

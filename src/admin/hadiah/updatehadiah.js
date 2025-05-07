@@ -1,16 +1,19 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {useLocation, useNavigate} from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 import ReactFileReader from 'react-file-reader';
 import formatCurrency from '../../helper/formatCurrency';
 import "../../App";
+import { useDispatch, useSelector } from 'react-redux';
+import { putUpdateHadiah } from '../../actions/actionPut';
+import { updateHadiahSlice } from '../../reducers/reducers'
 
 function UpdateHadiah() {
     const location = useLocation();
     const { ID, image, nama_barang, harga_hadiah, poin, deskripsi } = location.state;
-    // inialisai function rediarect
     const navigate = useNavigate();
+    const dispatch = useDispatch();
   
     // Panggil useState tanpa kondisi
     const [formValue, setFormValue] = useState({
@@ -67,32 +70,49 @@ function UpdateHadiah() {
       defaultImagePath = require(`../../images/${image}`);
     };
     
-    
+    const { resetUpdateHadiah } = updateHadiahSlice.actions;
+    const { success, error, statusErr } = useSelector((state) => state.updateHadiahState);
+    useEffect(() => {
+      if (success) {
+        console.log(success);
+        dispatch(resetUpdateHadiah());
+        navigate("/berkahjaya/adminside/hadiah");
+      }
+      if (error) {
+        console.error(error);
+          if (statusErr === 401) {
+              navigate('/login');
+              return;
+          };
+      }
+    }, [success, error, statusErr])
+
     const PostUpdate = () => {
       console.log(formValue)
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        withCredentials: true,
-      };
+      dispatch(putUpdateHadiah(formValue));
+      // const config = {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data'
+      //   },
+      //   withCredentials: true,
+      // };
 
-      axios.put('http://localhost:8080/admin/berkahjaya/adminside/hadiah/updatehadiah', formValue, config)
-        .then(response => {
-          console.log(response);
-          // melakukan redirect
-          navigate("/berkahjaya/adminside/hadiah");
-        })
-        .catch(error => {
-          console.error(error);
+      // axios.put('http://localhost:8080/admin/berkahjaya/adminside/hadiah/updatehadiah', formValue, config)
+      //   .then(response => {
+      //     console.log(response);
+      //     // melakukan redirect
+      //     navigate("/berkahjaya/adminside/hadiah");
+      //   })
+      //   .catch(error => {
+      //     console.error(error);
 
-          // Penanganan kesalahan khusus
-          if (error.response && error.response.status === 401) {
-              // Menavigasi ke halaman login jika tidak terotorisasi
-              navigate('/login');
-              return; // Menghentikan eksekusi kode selanjutnya
-          };
-        });
+      //     // Penanganan kesalahan khusus
+      //     if (error.response && error.response.status === 401) {
+      //         // Menavigasi ke halaman login jika tidak terotorisasi
+      //         navigate('/login');
+      //         return; // Menghentikan eksekusi kode selanjutnya
+      //     };
+      //   });
          
     };
       

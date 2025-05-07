@@ -5,42 +5,35 @@ import "../../App.css"
 import { useNavigate } from "react-router-dom";
 import SideBare from "../sideBare";
 import Navbar from "../../component/navbar";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAdminBarang } from "../../actions/actionsGet";
+import { postSearchBarang, postDeleteBarang } from "../../actions/actionsPost";
 
 function Barang() {
     // fungsi redirect to update barang
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     // useState untuk menyimpan data
     const [value, setValue] = useState([]);
 
-   
+    const { barang, errorBarang, responseStatus, loadingBarang } = useSelector((state) => state.adminBarangState);
+
     useEffect(() => {
-        // cek apakah value awalnya kosong dan result adalah null atau undefined
-        if (value && value.length === 0) {
-            const fetchData = async () => {
-                try {
-                    
-                    // mengatur axios untuk selalu mengirim cookie
-                    axios.defaults.withCredentials = true;
+        dispatch(fetchAdminBarang());
+    }, [dispatch]);
 
-                    // Make the GET request to the server with authorization headers
-                    const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/barang");
-
-                    // Update the state with the response data
-                    setValue(response.data);
-                    console.log("Successfully fetched data");
-                } catch(error) {
-                    console.error(error);
-                     // Penanganan kesalahan khusus
-                    if (error.response && error.response.status === 401) {
-                        // Menavigasi ke halaman login jika tidak terotorisasi
-                        navigate('/login');
-                        return; // Menghentikan eksekusi kode selanjutnya
-                    }
-                }
+    // handle response dari get data barang 
+    useEffect(() => {
+        if (barang) {
+            setValue(barang);
+        };
+        if (errorBarang) {
+            console.log(errorBarang);
+            if (responseStatus === 401) {
+                navigate('/login');
             };
-            fetchData();
-        } 
-    }, []); 
+        }
+    }, [barang, errorBarang, responseStatus]);
     
 
     const handleUpdate = (id, nama_barang, harga_barang, harga_beli, image, kode) => {
@@ -57,21 +50,27 @@ function Barang() {
     };
 
     // search
+    const { dataBarang, error } = useSelector((state) => state.searchBarangState);
+
     const handleSearch = async (searchTerm) => {
-        try {
           const formData = new FormData();
           formData.append('key', searchTerm);
-          const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang", formData);
-          console.log(response.data);
-          setValue(response.data); // Menyimpan hasil pencarian ke dalam state
-        } catch(error) {
-          console.error(error);
-        }
+          dispatch(postSearchBarang(formData));
     };
 
+    // handle setelah request search dari redux 
+    useEffect(() => {
+        if (dataBarang) {
+            setValue(dataBarang);
+        };
+        if (error) {
+            console.log(error);
+        };
+    }, [dataBarang, error]);
+    
     // handle menghapus barang
-    const handleDeleteItems = (id, nama_barang, harga_barang, harga_beli, image, kode) => {
-
+    const {response, errorDB, statusCode} = useSelector((state) => state.deleteBarangState);
+    const handleDeleteItems = async (id, nama_barang, harga_barang, harga_beli, image, kode) => {
         const data = {
             id: id, 
             nama_barang: nama_barang,
@@ -80,30 +79,21 @@ function Barang() {
             image: image, 
             kode: kode,
         };
-
-        const config = {
-            headers: {
-                "Content-Type": "application/json",
-            },
-            withCredentials: true,
-        };
-
-        axios.post('http://localhost:8080/admin/berkahjaya/adminside/barang/deletebarang', data, config)
-        .then(response => {
-            console.log('Response:', response.data);
-            window.location.reload();
-          })
-          .catch (error => {
-            console.error('Error:', error);
-    
-            // Penanganan kesalahan khusus
-            if (error.response && error.response.status === 401) {
-                // Menavigasi ke halaman login jika tidak terotorisasi
-                navigate('/login');
-                return; // Menghentikan eksekusi kode selanjutnya
-            }
-          });
+        dispatch(postDeleteBarang(data));
+        window.location.reload();
     };
+
+    useEffect (() => {
+        if (response) {
+            window.location.reload();
+        };
+        if (errorDB) {
+            console.error("Error delete hadiah:", errorDB);
+            if (statusCode === 401) {
+                navigate('/login');
+            } 
+        }
+    }, [response, statusCode]);
 
       const style = {
         container: {

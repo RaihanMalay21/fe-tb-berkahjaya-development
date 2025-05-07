@@ -4,31 +4,49 @@ import SideBare from "../sideBare";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { format } from 'date-fns';
+import { useSelector, useDispatch } from "react-redux";
+import { fetchNotaPengajuanPoin } from "../../actions/actionsGet";
 
 function Poin() {
     const navigate = useNavigate()
     const [value, setValue] = useState([]);
+    const dispatch = useDispatch();
+
+    const { data, error, statusErr, loading } = useSelector((state) => state.notaPengajuanPoinState);
+
+    useEffect(() => {
+        if (data) {
+            setValue(data);
+        }
+        if (error) {
+            setValue(error);
+            if (statusErr === 401) {
+                navigate('/login');
+            }
+        }
+    }, [data, error, statusErr])
 
     useEffect(() => {
         if (value && value.length === 0) {
-            const fetchData = async () => {
-                try {
-                    // mengatur axios untuk selalu mengirim cookie
-                    axios.defaults.withCredentials = true;
+            dispatch(fetchNotaPengajuanPoin());
+            // const fetchData = async () => {
+            //     try {
+            //         // mengatur axios untuk selalu mengirim cookie
+            //         axios.defaults.withCredentials = true;
 
-                    const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin");
+            //         const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin");
 
-                    setValue(response.data);
-                    console.log("Succesfully fetched data");
-                } catch(error) {
-                    console.error(error);
-                    if (error.response && error.response.status === 401) {
-                        navigate("/login");
-                        return;
-                    }
-                }
-            };
-            fetchData();
+            //         setValue(response.data);
+            //         console.log("Succesfully fetched data");
+            //     } catch(error) {
+            //         console.error(error);
+            //         if (error.response && error.response.status === 401) {
+            //             navigate("/login");
+            //             return;
+            //         }
+            //     }
+            // };
+            // fetchData();
         }
     }, []);
     console.log(value);

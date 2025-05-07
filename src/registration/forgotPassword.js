@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useNavigate } from "react-router-dom";
+import { postForgotPassword } from "../actions/actionsPost";
+import { forgotPasswordSlice } from "../reducers/reducers"
 
 function ForgotPassword() {
   const [form, setFrom] = useState({ emailOrUsername : ''});
   const [loadSpinners, setLoadSpinners] = useState(false);
   const [alertSuccess, setAlertSucces] = useState(false);
   const [messageSucces, setMessageSucces] = useState('');
-  const [messageFeals, setMessageFeals] = useState('');
+  const [messageFeals, setMessageFeals] = useState(null);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,46 +23,81 @@ function ForgotPassword() {
 
   useEffect(() => {
     if (form.emailOrUsername != '') {
-      setMessageFeals('');
+      setMessageFeals(null);
     }
-  })
+  }, [])
 
+
+  // handle submit to server forgot password
+  const { successMessageFP, errorMessageFP, loading } = useSelector((state) => state.forgotPasswordState);
+  const { resetForgotPassword } = forgotPasswordSlice.actions;
   const submit = async (e) => {
     e.preventDefault();
-    setLoadSpinners(true);
-   
-    try {
-      const response = await fetch('http://localhost:8080/access/berkahjaya/forgot/password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          emailOrUsername: form.emailOrUsername,
-        }).toString(),
-      });
-  
-      if (!response.ok) {
-        const errorMessage = await response.json();
-        throw new Error(errorMessage.message);
-      }
-
+    const data = new URLSearchParams({
+      emailOrUsername: form.emailOrUsername,
+    }).toString()
+    dispatch(postForgotPassword(data));
+  }
+  useEffect(() => {
+    if(successMessageFP) {
+      setMessageFeals(null);
       setFrom({emailOrUsername: ''});
-      const data = await response.json();
-      setMessageSucces(data.message);
+      setMessageSucces(successMessageFP);
       setAlertSucces(true);
-      setTimeout(() => {
-        setAlertSucces(false);
-      }, 3000)
-      console.log(data.message);
-    } catch (error) {
-      console.error('Error:', error.message);
-      setMessageFeals(error.message);
-      setFrom({emailOrUsername: ''});
-    } finally {
       setLoadSpinners(false);
+      const timer = setTimeout(() => {
+        setAlertSucces(false);
+        dispatch(resetForgotPassword());
+      }, 3000);
+      
+      return () => clearTimeout(timer);
     }
-  };
+
+    if(errorMessageFP) {
+      console.error('Error:', errorMessageFP);
+      setMessageFeals(errorMessageFP);
+      setFrom({emailOrUsername: ''});
+    }
+  
+    setLoadSpinners(loading);
+  }, [successMessageFP, errorMessageFP, loading])
+
+  // const submit = async (e) => {
+  //   e.preventDefault();
+  //   setLoadSpinners(true);
+   
+  //   try {
+  //     const response = await fetch('http://localhost:8080/access/berkahjaya/forgot/password', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded',
+  //       },
+  //       body: new URLSearchParams({
+  //         emailOrUsername: form.emailOrUsername,
+  //       }).toString(),
+  //     });
+  
+  //     if (!response.ok) {
+  //       const errorMessage = await response.json();
+  //       throw new Error(errorMessage.message);
+  //     }
+
+  //     setFrom({emailOrUsername: ''});
+  //     const data = await response.json();
+  //     setMessageSucces(data.message);
+  //     setAlertSucces(true);
+  //     setTimeout(() => {
+  //       setAlertSucces(false);
+  //     }, 3000)
+  //     console.log(data.message);
+  //   } catch (error) {
+  //     console.error('Error:', error.message);
+  //     setMessageFeals(error.message);
+  //     setFrom({emailOrUsername: ''});
+  //   } finally {
+  //     setLoadSpinners(false);
+  //   }
+  // };
 
   const handleNavigate = () => {
     navigate('/signup');

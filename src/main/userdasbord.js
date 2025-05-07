@@ -3,6 +3,9 @@ import NavbarUser from "./navuser"
 import Footer from "./footer";
 import React,{ useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDataProsesHadiah, fetchDataProsesPoin } from "../actions/actionsGet"
+import { postChangePassword, postRemoveNotaNotValid } from "../actions/actionsPost"
 import axios from "axios";
 import { set } from "date-fns";
 
@@ -11,7 +14,7 @@ function DasbordUser() {
     const [ ProsesNota, setProsesNota ] = useState(false);
     const [ ProsesHadiah, setProsesHadiah ] = useState(false);
     const location = useLocation();
-
+    const dispatch = useDispatch();
     // mengambil data user from redirect used useLocation
     const { username, email, whatshapp, poin } = location.state;
 
@@ -52,9 +55,9 @@ function DasbordUser() {
     const [ alertMessageChangePassword, setMessageAlertChangePassword] = useState("");
     const inputRef = useRef(null);
     // retreaving data proses nota from server
-    const [ dataProseNota, setDataProsesNota ] = useState([]);
+    // const [ dataProseNota, setDataProsesNota ] = useState([]);
     // mengambiil data Proses hadiah from server
-    const [ dataProsesHadiah, setDataProsesHadiah ] = useState([]);
+    // const [ dataProsesHadiah, setDataProsesHadiah ] = useState([]);
 
     const [ dataChangePassword, setDataChangePassword ] = useState({
         email: dataUser.email,
@@ -72,17 +75,22 @@ function DasbordUser() {
     }
 
     // request data Proses Hadiah ke server
+    const { dataProsesHadiah, error } = useSelector((state) => state.dataProsesHadiahState);
     useEffect(() => {
-        const fetchData = async () => {
-            try{
-                const response = await axios.get("http://localhost:8080/customer/berkahjaya/user/proses/hadiah", {withCredentials: true})
-                setDataProsesHadiah(response.data);
-            }catch(error){
-                console.error(error.response);
-            }
-        }
-        fetchData();
-    }, [])
+        dispatch(fetchDataProsesHadiah());
+    }, [dispatch]);
+    console.log(error);
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try{
+    //             const response = await axios.get("http://localhost:8080/customer/berkahjaya/user/proses/hadiah", {withCredentials: true})
+    //             setDataProsesHadiah(response.data);
+    //         }catch(error){
+    //             console.error(error.response);
+    //         }
+    //     }
+    //     fetchData();
+    // }, [])
 
     useEffect(() => {
         if (focusInputRepeatPassword && inputRef.current) {
@@ -120,62 +128,58 @@ function DasbordUser() {
         }))
     };
 
+    // section handle post change password 
+    const { responseSucces, errorField, errorMessage, errorCP } = useSelector((state) => state.changePasswordState)
+
     const submitChangePassword = async (e) => {
         e.preventDefault();
-
         if ( dataChangePassword.passwordNew !== dataChangePassword.passwordNewRepeat) {
             setFocusInputRepeatPassword(true);
             setFocusInputRepeatMessage("Password Baru Tidak Sesuai");
             dataChangePassword.passwordNewRepeat = "";
             return
-        } 
+        } else {
+            const data = {
+                email: dataChangePassword.email,
+                passwordBefore: dataChangePassword.passwordBefore, 
+                passwordNew: dataChangePassword.passwordNew   
+            }
+            dispatch(postChangePassword(data));
+        }
+    }
 
-        try {
-            const response = await axios.post( "http://localhost:8080/customer/berkahjaya/change/password", {   
-                    email: dataChangePassword.email,
-                    passwordBefore: dataChangePassword.passwordBefore, 
-                    passwordNew: dataChangePassword.passwordNew    
-                },{
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    withCredentials: true,
-                });
-            
-            console.log(response.data);
-            
+    useEffect(() => {
+        if (responseSucces) {
             setFocusInputRepeatMessage(false);
             setFocusInputRepeatMessage("");
             RefresDataChangePassword();
             setAlertSuccesChangePassword(true);
-            setMessageAlertChangePassword(response.data.message);
+            setMessageAlertChangePassword(responseSucces);
 
             setTimeout(() => {
                 setAlertSuccesChangePassword(false);
             }, 2500);
-        } catch(error) {
+        } else if (errorCP) {
             setFocusInputRepeatPassword(false);
             setFocusInputRepeatMessage("");
             console.error(error);
-            console.log(error.response.data.field)
-            
 
-            if (error.response.data.field === "passwordBefore") {
+            if (errorField === "passwordBefore") {
                 setFocusInputCurrentPassword(true);
-                setFocusInputCurrentPasswordMessage(error.response.data.message);
+                setFocusInputCurrentPasswordMessage(errorMessage);
                 dataChangePassword.passwordBefore = "";
                 return
             }
 
-            if (error.response.data.field === "passwordNew") {
-                setFocusInputNewPassword(error.response.data.field)
-                setFocusInputNewPasswordMessage(error.response.data.message);
+            if (errorField === "passwordNew") {
+                setFocusInputNewPassword(errorField)
+                setFocusInputNewPasswordMessage(errorMessage);
                 dataChangePassword.passwordNew = "";
                 dataChangePassword.passwordNewRepeat = "";
                 return
             }
         }
-    }
+    }, [responseSucces, errorCP]);
 
     const CancelSubmitChangePassword = () => {
         setFocusInputRepeatPassword(false);
@@ -203,7 +207,82 @@ function DasbordUser() {
             setFocusInputNewPassword(false);
         }
     })
+    
+    // mengambil data poin yang sedang di dalam proses kalkulasi beserta poin yang di reject(poin proses/ nota proses to poin)
+    const { dataProseNota, errorPP } = useSelector((state) => state.prosesPoinState);
 
+    useEffect(() => {
+        dispatch(fetchDataProsesPoin());
+    }, [dispatch])
+
+    useEffect(() => {
+        console.log(errorPP);
+    }, [errorPP])
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try{
+    //             const response = await axios.get("http://localhost:8080/customer/berkahjaya/proses/poin/verify", { withCredentials: true });
+    //             setDataProsesNota(response.data);
+    //         } catch(error) {    
+    //             console.error(error)
+    //         }
+    //     }
+    //     fetchData();
+    // }, [])
+
+    // menghapus nota yang tidak valid atau sudah di tolak oleh admin
+    const { successRemoveNota, errorRemoveNota } = useSelector((state) => state.removeNotaNotValidState)
+
+    const handleRemoveNotaNotValid = async (ID) => {
+        dispatch(postRemoveNotaNotValid(ID));
+    }
+    
+    useEffect(() => {
+        if (successRemoveNota) {
+            console.log("Nota berhasil dihapus:", successRemoveNota);
+            // Simpan status aktif ke localStorage
+            localStorage.setItem('activeSection', 'ProsesNota');
+            window.location.reload();
+        }
+        if (errorRemoveNota) {
+            console.log("Error saat menghapus nota", errorRemoveNota)
+        }
+    }, [successRemoveNota, errorRemoveNota])
+    // const handleRemoveNotaNotValid = async (ID) => {
+    //     try {
+    //         const config = {
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             withCredentials : true,
+    //         }
+
+    //         const data = {
+    //             ID: ID,
+    //         }
+
+    //         const response = await axios.post("http://localhost:8080/customer/berkahjaya/user/remove/nota/not/valid", data, config)
+    //         console.log(response.data);
+
+    //         // Simpan status aktif ke localStorage
+    //         localStorage.setItem('activeSection', 'ProsesNota')
+
+    //         window.location.reload();
+    //     } catch(error) {
+    //         console.error(error.response);
+    //     }
+    // }
+
+    // berfungsi untuk after handleRemoveNotaNotValid success users tetap berada di section prosesNota
+    useEffect(() => {
+        const activeNota = localStorage.getItem('activeSection')
+        if (activeNota === 'ProsesNota') {
+            setProsesNota(true);
+            setUserProfile(false);
+            setProsesHadiah(false);
+        }
+    }, []);
 
     const style = {
         svgPersonal: {
@@ -303,54 +382,6 @@ function DasbordUser() {
             ...(ProsesHadiah ? {backgroundColor: '#00666450'} : {})
         }
     }
-    
-    useEffect(() => {
-        const fetchData = async () => {
-            try{
-                const response = await axios.get("http://localhost:8080/customer/berkahjaya/proses/poin/verify", { withCredentials: true });
-                setDataProsesNota(response.data);
-            } catch(error) {    
-                console.error(error)
-            }
-        }
-        fetchData();
-    }, [])
-
-    // menghapus nota yang tidak valid atau sudah di tolak oleh admin
-    const handleRemoveNotaNotValid = async (ID) => {
-        try {
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials : true,
-            }
-
-            const data = {
-                ID: ID,
-            }
-
-            const response = await axios.post("http://localhost:8080/customer/berkahjaya/user/remove/nota/not/valid", data, config)
-            console.log(response.data);
-
-            // Simpan status aktif ke localStorage
-            localStorage.setItem('activeSection', 'ProsesNota')
-
-            window.location.reload();
-        } catch(error) {
-            console.error(error.response);
-        }
-    }
-
-    // berfungsi untuk after handleRemoveNotaNotValid success users tetap berada di section prosesNota
-    useEffect(() => {
-        const activeNota = localStorage.getItem('activeSection')
-        if (activeNota === 'ProsesNota') {
-            setProsesNota(true);
-            setUserProfile(false);
-            setProsesHadiah(false);
-        }
-    }, []);
 
     return(
         <div>

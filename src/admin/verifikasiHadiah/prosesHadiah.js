@@ -2,6 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import SideBare from "../sideBare";
 import Navbar from "../../component/navbar";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchPengajuanHadiah } from "../../actions/actionsGet";
+import { postHadiahTelahTiba, postPengajuanHadiahFineshed } from "../../actions/actionsPost";
+import { hadiahTelahTibaSlice } from "../../reducers/reducers"
 
 function ProsesHadiah() {
     const [ hadiahUser, setHadiahUser ] = useState([]);
@@ -14,19 +18,34 @@ function ProsesHadiah() {
     const [ dataFineshed, setDataFineshed ] = useState();
     const [ spinners, setSpinners ] = useState(false);
     const [ prosesFailed, setProsesFailed ] = useState(false);
+    const dispatch = useDispatch();
+ 
     // mengabil data hadiah users from server
+    const { dataPengajuanHadiah, errorPH, loadingPengajuan } = useSelector((state) => state.pengajuanHadiahState);
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/hadiah", { withCredentials: true})
-                setHadiahUser(response.data);
-                console.log(response.data);
-            } catch(error) {
-                console.error(error.response);
-            }
-        }
-        fetchData();
+        dispatch(fetchPengajuanHadiah());
     }, [])
+
+    useEffect(() => {
+        // const fetchData = async () => {
+        //     try {
+        //         const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/hadiah", { withCredentials: true})
+        //         setHadiahUser(response.data);
+        //         console.log(response.data);
+        //     } catch(error) {
+        //         console.error(error.response);
+        //     }
+        // }
+        // fetchData(); 
+        if (dataPengajuanHadiah) {
+            setHadiahUser(dataPengajuanHadiah);
+            console.log(dataPengajuanHadiah);
+        }
+        if (errorPH) {
+            console.error(errorPH);
+        }
+    }, [dataPengajuanHadiah, errorPH])
 
     // mengatur information details hadiah users
     useEffect(() => {
@@ -49,14 +68,16 @@ function ProsesHadiah() {
     }, [hadiahUser])
 
     // handle hadiah telah tiba dan mengirim email ke users tersebut
+    const { resetHadiahTelahTiba } = hadiahTelahTibaSlice.actions;
+    const { success, error, loading } = useSelector((state) => state.hadiahTelahTibaState);
     const handleGifthaveArrive = async () => {
-        try{
-            const config = {
-                header: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            }
+        // try{
+        //     const config = {
+        //         header: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         withCredentials: true,
+        //     }
 
             const data = {
                 UserID: dataGiftArrive.UserID, 
@@ -73,30 +94,70 @@ function ProsesHadiah() {
                 Status: dataGiftArrive.Status, 
                 CreatedAt: dataGiftArrive.CreatedAt,
             }
-            setModalGiftArrive(false);
-            setSpinners(true);
-            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/sendmsgggiftsarrive", data, config)
-            console.log(response.data);
+            dispatch(postHadiahTelahTiba(data));
+        //     setModalGiftArrive(false);
+        //     setSpinners(true);
+        //     const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/sendmsgggiftsarrive", data, config)
+        //     console.log(response.data);
+        //     window.location.reload();
+        // } catch(error) {
+        //     console.error(error.response);
+        //     setSpinners(false);
+        //     setProsesFailed(true);
+        //     setTimeout(() => {
+        //         setProsesFailed(false);
+        //     }, 2000);
+        // }
+    } 
+    
+    useEffect(() => {
+        if (success) {
+            console.log(success);
             window.location.reload();
-        } catch(error) {
-            console.error(error.response);
-            setSpinners(false);
+            resetHadiahTelahTiba();
+        }
+        if (error) {
+            console.error(error);
             setProsesFailed(true);
             setTimeout(() => {
                 setProsesFailed(false);
             }, 2000);
         }
-    } 
+        if (loading) {
+            setModalGiftArrive(false);
+            setSpinners(true);
+        }
+    }, [success, error, loading])
 
     // handle proses pengajuan fineshed
+    const { successPHF, errorPHF, loadingPHF } = useSelector((state) => state.pengajuanHadiahFineshedState);
+
+    useEffect(() => {
+        if (successPHF) {
+            setModalGiftFineshed(false);
+            console.log(successPHF);
+            window.location.reload();
+        }
+        if (errorPHF) {
+            console.error(errorPHF);
+            setProsesFailed(true);
+            setTimeout(() => {
+                setProsesFailed(false);
+            }, 2000);
+        }
+        if (loadingPHF) {
+            setSpinners(true);
+        }
+    }, [successPHF, errorPHF, loadingPHF])
+    
     const handlePengajuanFineshed = async () => {
-        try {
-            const config = {
-                header: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            };
+        // try {
+        //     const config = {
+        //         header: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         withCredentials: true,
+        //     };
 
             const data = {
                 UserID: dataFineshed.UserID,
@@ -114,19 +175,20 @@ function ProsesHadiah() {
                 GiftsArrive: dataFineshed.GiftsArrive,
                 CreatedAt: dataFineshed.CreatedAt,
             }
-            setModalGiftFineshed(false);
-            setSpinners(true);
-            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/finished", data, config)
-            console.log(response.data);
-            window.location.reload();
-        } catch(error) {
-            console.error(error.response);
-            setSpinners(false);
-            setProsesFailed(true);
-            setTimeout(() => {
-                setProsesFailed(false);
-            }, 2000);
-        }
+            dispatch(postPengajuanHadiahFineshed(data));
+        //     setModalGiftFineshed(false);
+        //     setSpinners(true);
+        //     const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/finished", data, config)
+        //     console.log(response.data);
+        //     window.location.reload();
+        // } catch(error) {
+        //     console.error(error.response);
+        //     setSpinners(false);
+        //     setProsesFailed(true);
+        //     setTimeout(() => {
+        //         setProsesFailed(false);
+        //     }, 2000);
+        // }
     } 
 
     // modal untuk ensure hadiah telah tiba

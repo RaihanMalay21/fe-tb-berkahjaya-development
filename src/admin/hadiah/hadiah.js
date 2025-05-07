@@ -5,33 +5,52 @@ import React, { useState, useEffect } from 'react';
 import "../../App.css";
 import Navbar from '../../component/navbar';
 import SideBare from '../sideBare';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAdminHadiah } from "../../actions/actionsGet";
+import { postSearchHadiah, postDeleteHadiah } from "../../actions/actionsPost";
 
 
 function Hadiah() {
     const [datalist, setDataList] = useState([]);
-  
+    const dispatch = useDispatch();
+
+    const {data, error, statusErr, loadingHadiah} = useSelector((state) => state.hadiahAdminState);
+
     useEffect(() => {
-      if (datalist && datalist.length === 0) {
-        const fetchData = async () => {
-          try {
-            axios.defaults.withCredentials = true;
-            const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/hadiah");
-            setDataList(response.data);
-          } catch (error) {
-            console.error("Error fetching data:", error);
-            // Penanganan kesalahan khusus
-            if (error.response && error.response.status === 401) {
-                // Menavigasi ke halaman login jika tidak terotorisasi
-                navigate('/login');
-                return; // Menghentikan eksekusi kode selanjutnya
-            }
-          } 
-        };
-        fetchData();
-      }
-    }, [datalist]);
+      dispatch(fetchAdminHadiah());
+      // if (datalist && datalist.length === 0) {
+        // const fetchData = async () => {
+        //   try {
+        //     axios.defaults.withCredentials = true;
+        //     const response = await axios.get("http://localhost:8080/admin/berkahjaya/adminside/hadiah");
+        //     setDataList(response.data);
+        //   } catch (error) {
+        //     console.error("Error fetching data:", error);
+        //     // Penanganan kesalahan khusus
+        //     if (error.response && error.response.status === 401) {
+        //         // Menavigasi ke halaman login jika tidak terotorisasi
+        //         navigate('/login');
+        //         return; // Menghentikan eksekusi kode selanjutnya
+        //     }
+        //   } 
+        // };
+        // fetchData();
+      // }
+    }, [dispatch]);
     console.log(datalist)
     
+    useEffect(() => {
+      if (data) {
+        setDataList(data);
+      }
+      if (error) {
+        console.error("Error fetching data:", error);
+        if (statusErr === 401) {
+              navigate('/login');
+              return; 
+          }
+      }
+    }, [data, error, statusErr])
   
     // navigasi atau redirect ke path lainnya
     const navigate = useNavigate()
@@ -49,18 +68,50 @@ function Hadiah() {
     };
 
     // component menangani pencarian 
+    const {dataSH, errorSH} = useSelector((state) => state.searchHadiahState);
+
     const handleSeacrh = async (searcTerm) => {
-      try {
-        const formdata = new FormData();
-        formdata.append('key', searcTerm);
-        const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah', formdata);
-        setDataList((await response).data);
-      } catch(error) {
-        console.error(error);
-      }
+      const formData = new FormData();
+      formData.append('key', searcTerm);
+      dispatch(postSearchHadiah(formData));
+      // try {
+      //   const formdata = new FormData();
+      //   formdata.append('key', searcTerm);
+      //   const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah', formdata);
+      //   setDataList((await response).data);
+      // } catch(error) {
+      //   console.error(error);
+      // }
     };
 
+    useEffect(() => {
+      if (dataSH) {
+        setDataList(dataSH);
+      };
+      if (errorSH) {
+        console.error(errorSH);
+      };
+      if (dataSH && dataSH.length === 0) {
+        setDataList(data);
+      }
+    }, [dataSH, errorSH])
+
     // handle menghapus hadiah 
+    const {successDH, errorDH, statusDH} = useSelector((state) => state.deleteHadiahState);
+
+    useEffect(() => {
+      if (successDH) {
+        console.log("response delate hadiah", successDH);
+        window.location.reload();
+      }
+      if (errorDH) {
+        console.log(errorDH);
+        if (statusDH === 401) {
+          navigate('/login');
+        }
+      }
+    }, [successDH, errorDH, statusDH])
+    
     const handleDeleteHadiah = (ID, image, nama_barang, harga_hadiah, poin, desc) => {
       const data = {
         ID: ID,
@@ -70,28 +121,29 @@ function Hadiah() {
         poin: poin,
         desc: desc,
       }
-      const config = {
-        headers : {
-          'Content-Type' : 'application/json',
-        },
-        withCredentials: true,
-      }
+      dispatch(postDeleteHadiah(data));
+      // const config = {
+      //   headers : {
+      //     'Content-Type' : 'application/json',
+      //   },
+      //   withCredentials: true,
+      // }
 
-      axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah/deletehadiah', data, config)
-      .then(response => {
-        console.log('Response:', response.data);
-        window.location.reload();
-      })
-      .catch (error => {
-        console.error('Error:', error);
+      // axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah/deletehadiah', data, config)
+      // .then(response => {
+      //   console.log('Response:', response.data);
+      //   window.location.reload();
+      // })
+      // .catch (error => {
+      //   console.error('Error:', error);
 
-        // Penanganan kesalahan khusus
-        if (error.response && error.response.status === 401) {
-            // Menavigasi ke halaman login jika tidak terotorisasi
-            navigate('/login');
-            return; // Menghentikan eksekusi kode selanjutnya
-        }
-      });
+      //   // Penanganan kesalahan khusus
+      //   if (error.response && error.response.status === 401) {
+      //       // Menavigasi ke halaman login jika tidak terotorisasi
+      //       navigate('/login');
+      //       return; // Menghentikan eksekusi kode selanjutnya
+      //   }
+      // });
     };
 
     const style = {

@@ -68,19 +68,17 @@ const NavbarUser = ({ onUploadNota }) => {
     };
 
     // handle log Out
-    const { message, error } = useSelector((state) => state.logoutState);
+    const { message, error } = useSelector((state) => state.logoutState)
 
-    const handleLogOut = async () => {
-        try {
-            await dispatch(Logout());  // unwrap untuk menangani error jika ada
-            console.log(message);
-            setTimeout(() => {
-                window.location.reload();
-            }, 1)
-            navigate("/berkahjaya");
-        } catch(error) {
-            console.error("Logout failed", error);
+    useEffect(() => {
+        if (message) {
+            window.location.reload()
+            navigate("/berkahjaya")
         }
+    }, [message])
+
+    const handleLogOut = () => {
+        dispatch(Logout())
     }
 
     // set tampilkan container-fill-nav-usersdata jika user telah login

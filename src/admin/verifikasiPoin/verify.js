@@ -3,6 +3,8 @@ import SideBare from "../sideBare";
 import { useLinkClickHandler, useLocation, useNavigate } from "react-router-dom";
 import "../../App.css";
 import axios from "axios";
+import { useSelector, useDispatch } from "react-redux";
+import { postSearchBarangPembelian, postSubmitNotaCancel, postSubmitNotaSuccess } from "../../actions/actionsPost";
 
 function VerificationPoin() {
     const navigate = useNavigate();
@@ -29,29 +31,47 @@ function VerificationPoin() {
     const [ dateRequired, setDateRequired ] = useState(false);
     const [ itemRequired, setItemRequired ] = useState(false);
     const [ alertFails, setAlertFails ] = useState(false);
+    const dispatch = useDispatch()
 
-    const handleSearchBarangPembelian = async () => {
-        try{
-            const config = {
-                headers: {
-                    "Content-type": 'multipart/form-data',
-                },
-                withCredentials: true,
-            };
-            const formData = new FormData();
-            formData.append('key', keySearch);
-            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang/search", formData, config);
-            console.log(response.data);
-            setSearchBarang(response.data);
+    const { data, lengthData, errorSB } = useSelector((state) => state.searchBarangPembelianState);
 
-            if (response.data.length === 0) {
+    useEffect(() => {
+        if (data) {
+            setSearchBarang(data);
+            if (lengthData === 0) {
                 setSearchNotAvailable(true);
             } else {
                 setSearchNotAvailable(false); // Pastikan untuk mengembalikan ke false jika data ditemukan
             }
-        }catch(error) {
-            console.error('Error:', error);
         }
+        if (errorSB) {
+            console.error(errorSB);
+        }
+    }, [data, lengthData, errorSB])
+   
+    const handleSearchBarangPembelian = async () => {
+        // try{
+        //     const config = {
+        //         headers: {
+        //             "Content-type": 'multipart/form-data',
+        //         },
+        //         withCredentials: true,
+        //     };
+            const formData = new FormData();
+            formData.append('key', keySearch);
+            dispatch(postSearchBarangPembelian(formData));
+        //     const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang/search", formData, config);
+        //     console.log(response.data);
+        //     setSearchBarang(response.data);
+
+        //     if (response.data.length === 0) {
+        //         setSearchNotAvailable(true);
+        //     } else {
+        //         setSearchNotAvailable(false); // Pastikan untuk mengembalikan ke false jika data ditemukan
+        //     }
+        // }catch(error) {
+        //     console.error('Error:', error);
+        // }
     }
 
     const handleSearch = (event) => {
@@ -158,6 +178,19 @@ function VerificationPoin() {
 
     console.log(barang);
 
+    const { success, errorSNC, statusErrSNC } = useSelector((state) => state.submitNotaCancelState);
+    useEffect (() => {
+        if (success) {
+            navigate("/berkahjaya/adminside/poin");
+        }
+        if (errorSNC) {
+            console.error(errorSNC);
+            if (statusErrSNC === 401) {
+                navigate('/login');
+            }
+        }
+    }, [success, errorSNC, statusErrSNC])
+
     const handleSubmitCancelNota = () => {
         if (KeteranganTolak === '') {
             setModalComment(true);
@@ -177,33 +210,53 @@ function VerificationPoin() {
             image: image,
             keterangan: KeteranganTolak,
         }
+        dispatch(postSubmitNotaCancel(data));
+        // const config ={
+        //     headers: {
+        //         "Content-Type": "application/json"
+        //     },
+        //     withCredentials: true,
+        // };
 
-        const config ={
-            headers: {
-                "Content-Type": "application/json"
-            },
-            withCredentials: true,
-        };
-
-        axios.post('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/verify/cancel', data, config)
-        .then(response => {
-            console.log('Response:', response.data);
-            navigate("/berkahjaya/adminside/poin");
-        })
-        .catch (error => {
-            console.error("Error:", error);
-            // Penanganan kesalahan khusus
-            if (error.response && error.response.status === 401) {
-                // Menavigasi ke halaman login jika tidak terotorisasi
-                navigate('/login');
-                return; // Menghentikan eksekusi kode selanjutnya
-            }
-        })
+        // axios.post('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/verify/cancel', data, config)
+        // .then(response => {
+        //     console.log('Response:', response.data);
+        //     navigate("/berkahjaya/adminside/poin");
+        // })
+        // .catch (error => {
+        //     console.error("Error:", error);
+        //     // Penanganan kesalahan khusus
+        //     if (error.response && error.response.status === 401) {
+        //         // Menavigasi ke halaman login jika tidak terotorisasi
+        //         navigate('/login');
+        //         return; // Menghentikan eksekusi kode selanjutnya
+        //     }
+        // })
     }
 
     const handleChangeDate = (event) => {
         setTanggalPembelian(event.target.value);
     }
+
+    const { successNS, errorSNS, statusErrSNS } = useSelector((state) => state.submitNotaSuccessState);
+    
+    useEffect(() => {
+        if (successNS) {
+            console.log(successNS);
+            navigate("/berkahjaya/adminside/poin")
+        }
+        if (errorSNS) {
+            console.error("Error:", errorSNS);
+            setAlertFails(true);
+            setTimeout(() => {
+                setAlertFails(false);
+            }, 2000);
+
+            if (statusErrSNS === 401) {
+                navigate("/login");
+            }
+        }
+    }, [successNS, errorSNS, statusErrSNS])
 
     const handleSuccesNota = async () => {
         if (tanggalPembelian === '') {
@@ -214,11 +267,10 @@ function VerificationPoin() {
             return;
         }
 
-        try {
+        // try {
             const data = {
                 ID : ID, 
                 CreatedAt: CreatedAt, 
-                UpdatedAt: CreatedAt,
                 userid: userid, 
                 tanggal_pembelian: tanggalPembelian,
                 image: image,
@@ -228,28 +280,29 @@ function VerificationPoin() {
 
             console.log(data);
 
-            const config = {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            };
+            dispatch(postSubmitNotaSuccess(data));
+        //     const config = {
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         withCredentials: true,
+        //     };
 
-            const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/verify', data, config);
-            console.log(response.data);
-            navigate("/berkahjaya/adminside/poin")
-        } catch(error) {
-            console.error("Error:", error.response);
-            setAlertFails(true);
-            setTimeout(() => {
-                setAlertFails(false);
-            }, 2000);
+        //     const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin/verify', data, config);
+        //     console.log(response.data);
+        //     navigate("/berkahjaya/adminside/poin")
+        // } catch(error) {
+        //     console.error("Error:", error.response);
+        //     setAlertFails(true);
+        //     setTimeout(() => {
+        //         setAlertFails(false);
+        //     }, 2000);
 
-            if (error.response && error.response.status == 401) {
-                navigate("/login");
-                return;
-            }
-        }
+        //     if (error.response && error.response.status == 401) {
+        //         navigate("/login");
+        //         return;
+        //     }
+        // }
     }
 
     const style = {

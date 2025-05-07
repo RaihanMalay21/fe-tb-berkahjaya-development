@@ -15,16 +15,18 @@ import ProsesHadiah from './admin/verifikasiHadiah/prosesHadiah';
 import ScrollToTop from './helper/ScrollToTop';
 import Poin from './admin/verifikasiPoin/poin';
 import VerificationPoin from './admin/verifikasiPoin/verify';
+import SignupVerification from './registration/verificationSignup';
 import React, { useState, useEffect, createContext} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers } from './actions/actionsGet';
+import axios from "axios";
 
 
 // const apiCustonerUrl = import.meta.env.VITE_API_CUSTOMER_URLL;
 export const ValueContext = createContext(); 
 
 function App() {
-  // const [ dataUser, setDataUser ] = useState(null);
+  const [ dataUser, setDataUser ] = useState(null);
   const dispatch = useDispatch();
   const [ onLogin, setOnLogin ] = useState(true);
 
@@ -52,7 +54,8 @@ function App() {
   //     setOnLogin(false);
   //   }
   // }, [dispatch, error, loading])
-  // get data user form server
+  
+  // // get data user form server
   // useEffect(() => {
   //   const fetchData = async () =>  {
   //       try {
@@ -68,6 +71,7 @@ function App() {
   //   fetchData();
   // }, []);
 
+
   return (
     <Router>
       <div>
@@ -75,6 +79,7 @@ function App() {
         < ValueContext.Provider value={{ users, onLogin }}>
           <Routes>
             <Route path='/signup' element={<SignUp/>} />
+            <Route path='/signup/verification' element={<SignupVerification/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/berkahjaya/forgot/password' element={<ForgotPassword/>} />
 

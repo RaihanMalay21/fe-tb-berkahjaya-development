@@ -110,8 +110,8 @@
 
 /********************************** login *****************************************/
 .login-form{
-  min-height: 100vh;
   padding: 30px;
+  height: 120vh;
   justify-content: center;
   display: grid;
   font-family: 'poppins',sans-serif;

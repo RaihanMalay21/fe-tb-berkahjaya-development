@@ -13,7 +13,7 @@ function Login() {
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
-        usernameORemail : '',
+        email : '',
         password: '',
     });
 
@@ -26,12 +26,9 @@ function Login() {
     };
 
     const { messageLoginSuccess, errorLogin, loadingLogin,  statusCodeSuccess, errPass, errUsername } = useSelector((state) => state.loginState);
-
     const submit = async (e) => {
         e.preventDefault();
         dispatch(postLogin(formData));
-        console.log(messageLoginSuccess);
-        console.log(errorLogin);
     } 
 
     // useEffect untuk memonitor perubahan statusCodeSuccess dan errorLogin
@@ -42,7 +39,7 @@ function Login() {
             }, 1);
             navigate("/berkahjaya");
         } 
-    }, [statusCodeSuccess, navigate]);
+    }, [statusCodeSuccess]);
 
 
     // handle reset password

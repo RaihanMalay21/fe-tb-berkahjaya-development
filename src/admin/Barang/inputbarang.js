@@ -1,15 +1,19 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "../../App.css";
 import formatCurrency from '../../helper/formatCurrency';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../component/navbar';
 import SideBare from '../sideBare';
+import { useDispatch, useSelector } from 'react-redux';
+import { postInputBarang } from "../../actions/actionsPost";
 
 function InputBarang() {
     // inialisasi navigate atau redirect
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const [formValue, setFormValue] = useState({
         nama_barang: '',
         harga_barang: '',
@@ -36,30 +40,72 @@ function InputBarang() {
         })
     };
 
+    const { msgSuccess, msgError, responseStatus, errValidateField } = useSelector((state) => state.inputBarangState);
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         const formData = new FormData(event.target); // membuat object formdata dari formulir
         
-        try {
-            const config = {
-                headers : {
-                    "Content-Type": "multipart/form-data"
-                },
-                withCredentials: true,
-            };
-            const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang/inputbarang", formData, config);
+        dispatch(postInputBarang(formData));
+        // try {
+            // const config = {
+            //     headers : {
+            //         "Content-Type": "multipart/form-data"
+            //     },
+            //     withCredentials: true,
+            // };
+            // const response = await axios.post("http://localhost:8080/admin/berkahjaya/adminside/barang/inputbarang", formData, config);
 
-            // ambil message response succes
-            setMessage(response.data);
-            // menampilkan alert succes
+            // // ambil message response succes
+            // setMessage(response.data);
+            // // menampilkan alert succes
+            // setAlertSucces(true);
+            // // set time untuk alert
+            // setTimeout(() => {
+            //     setAlertSucces(false);
+            // }, 2500);
+
+            // mengosongkan kembali usesate
+            // setFormValue({
+            //     ...formValue,
+            //     nama_barang: '',
+            //     harga_barang: '',
+            //     harga_beli: '',
+            //     kode: '',
+            //     image: '',
+            // });
+        // } catch(error) {
+        //     console.error(error);
+
+        //     // Penanganan kesalahan khusus
+        //     if (error.response && error.response.status === 401) {
+        //         // Menavigasi ke halaman login jika tidak terotorisasi
+        //         navigate('/login');
+        //         return; // Menghentikan eksekusi kode selanjutnya
+        //     }
+
+        //     // ambil pesan error
+        //     setMessage(error.response.data.message);
+        //     // tampilkan alert error
+        //     setAlertError(true);
+        //     // hide after 2.5 second
+        //     setTimeout(() => {
+        //         setAlertError(false);
+        //     }, 2500);
+
+        // };
+    };
+
+    // handle untuk menangani response dari request to servser
+    useEffect(() => {
+        if (msgSuccess && responseStatus === 200) {
+            setMessage(msgSuccess);
             setAlertSucces(true);
-            // set time untuk alert
             setTimeout(() => {
                 setAlertSucces(false);
             }, 2500);
 
-            // mengosongkan kembali usesate
+            // kosongkan data 
             setFormValue({
                 ...formValue,
                 nama_barang: '',
@@ -68,27 +114,21 @@ function InputBarang() {
                 kode: '',
                 image: '',
             });
-        } catch(error) {
-            console.error(error);
-
-            // Penanganan kesalahan khusus
-            if (error.response && error.response.status === 401) {
-                // Menavigasi ke halaman login jika tidak terotorisasi
-                navigate('/login');
-                return; // Menghentikan eksekusi kode selanjutnya
-            }
-
-            // ambil pesan error
-            setMessage(error.response.data.message);
-            // tampilkan alert error
+        };
+        if (msgError) {
+            console.log("Error:", msgError);
+            setMessage(msgError);
             setAlertError(true);
-            // hide after 2.5 second
             setTimeout(() => {
                 setAlertError(false);
             }, 2500);
+            if (responseStatus === 401) {
+                navigate('/login');
+                return; 
+            }
+        }
+    }, [msgSuccess, msgError, responseStatus, errValidateField])
 
-        };
-    };
 
     const style = {
         container: {
@@ -147,23 +187,23 @@ function InputBarang() {
                         <form encType="multipart/form-data" onSubmit={handleSubmit}>
                             <div class="mb-3">
                                 <label for="exampleInputNB" class="form-label">Nama Barang</label>
-                                <input class="form-control" type="text" name="nama_barang" onChange={handleChange} value={formValue.nama_barang} aria-label="default input example"/>
+                                <input class="form-control"  type="text" name="nama_barang" onChange={handleChange} value={formValue.nama_barang} aria-label="default input example" required/>
                             </div>
                             <div class="mb-3">
                                 <label htmlFor="exampleInputharga" class="form-label">Harga Barang</label>
-                                <input class="form-control" type="number" name='harga_barang' onChange={handleChange} value={formValue.harga_barang} onInput={event => formatCurrency(event.target)} id="exampleInputharga" />
+                                <input class="form-control" type="text" name='harga_barang' onChange={handleChange} value={formValue.harga_barang}  id="exampleInputharga" required/>
                             </div>
                             <div class="mb-3">
                                 <label htmlFor="exampleInputharga" class="form-label">Harga Beli</label>
-                                <input class="form-control" type="number" name='harga_beli' onChange={handleChange} value={formValue.harga_beli} onInput={event => formatCurrency(event.target)} id="exampleInputharga" />
+                                <input class="form-control" type="text" name='harga_beli' onChange={handleChange} value={formValue.harga_beli} id="exampleInputharga" required/>
                             </div>
                             <div class="mb-3">
                                 <label htmlFor="exampleInputkode" class="form-label">Kode Barang</label>
-                                <input  class="form-control" type="number" name='kode' onChange={handleChange} value={formValue.kode} id="exampleInputkode"/>
+                                <input  class="form-control" type="number" name='kode' onChange={handleChange} value={formValue.kode} id="exampleInputkode" required/>
                             </div>
                             <div class="mb-3">
                                 <label htmlFor="formFile" class="form-label">Foto Barang</label>
-                                <input class="form-control" type="file" name='image' onChange={handleChange} value={formValue.image} id="formFile"/>
+                                <input class="form-control" type="file" name='image' onChange={handleChange} value={formValue.image} id="formFile" required/>
                             </div>
                             <button type="submit" class="btn btn-secondary" style={{width: '100%', marginTop: '1rem', fontSize: '22.5px', backgroundColor: '#006664', color: 'white'}}>Submit</button>
                         </form>

@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from "axios";
 import "../../App.css";
 import formatCurrency from "../../helper/formatCurrency";
 import { useNavigate } from "react-router-dom";
 import SideBare from "../sideBare";
+import { useDispatch, useSelector } from "react-redux";
+import { postInputHadiah } from "../../actions/actionsPost";
 
 function InputHadiah() {
     // inialisasi navigate atau redirect
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     // state untuk  menyimpan nilai input
     const [formData, setFormData] = useState({
       image: '',
@@ -38,54 +42,85 @@ function InputHadiah() {
     };
   
     // handler untuk mengirim formulir
-    const handleSubmit = async (event) => {
-      event.preventDefault();
-  
-      const formData = new FormData(event.target); // membuat object formdata dari formulir
-  
-      try {
-        // kirim data menggunakan Axios
-        const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah/inputhadiah', formData, {
-          headers : {
-            'Content-Type' : 'multipart/form-data'
-          },
-          withCredentials: true,
-        });
-  
-        console.log('Response:', response.data);
-        // menampilkan response message used alert succes
-        setMsg(response.data.message);
-        setSuccesAlert(true);
-        // hide alert
-        setTimeout(() => {
-          setSuccesAlert(false);
-        }, 2500); 
+    const { msgSuccess, msgError, errStatus } = useSelector((state) => state.inputHadiahState);
 
-        // mengatur kembali input setelah berhasil mengirimkan value
+    useEffect(() => {
+      if (msgSuccess) {
+        setMsg(msgSuccess);
+        setSuccesAlert(true);
         setFormData({
           image: '',
           nama_barang: '',
           harga_hadiah: '',
-          poin: '',
           desc: ''
-        });
-      } catch (error) {
-        console.error('Error:', error);
-
-        // Penanganan kesalahan khusus
-        if (error.response && error.response.status === 401) {
-            // Menavigasi ke halaman login jika tidak terotorisasi
+        })
+        // hide alert
+        setTimeout(() => {
+          setSuccesAlert(false);
+        }, 2500); 
+      }
+      if (msgError) {
+        console.error('Error:', msgError);
+          if (errStatus === 401) {
             navigate('/login');
-            return; // Menghentikan eksekusi kode selanjutnya
+            return; 
         }
-        // menampilakan response error used alert
-        setMsg(error.response.data.message);
+        setMsg(msgError);
         setErrorAlert(true);
-        // hide alert after 2,5 second
         setTimeout(() => {
           setErrorAlert(false);
         }, 2500);
       }
+    }, [msgSuccess, msgError, errStatus])
+
+    const handleSubmit = async (event) => {
+      event.preventDefault();
+  
+      const formData = new FormData(event.target); // membuat object formdata dari formulir
+      dispatch(postInputHadiah(formData));
+      // try {
+      //   // kirim data menggunakan Axios
+      //   const response = await axios.post('http://localhost:8080/admin/berkahjaya/adminside/hadiah/inputhadiah', formData, {
+      //     headers : {
+      //       'Content-Type' : 'multipart/form-data'
+      //     },
+      //     withCredentials: true,
+      //   });
+  
+      //   console.log('Response:', response.data);
+      //   // menampilkan response message used alert succes
+      //   setMsg(response.data.message);
+      //   setSuccesAlert(true);
+      //   // hide alert
+      //   setTimeout(() => {
+      //     setSuccesAlert(false);
+      //   }, 2500); 
+
+      //   // mengatur kembali input setelah berhasil mengirimkan value
+      //   setFormData({
+      //     image: '',
+      //     nama_barang: '',
+      //     harga_hadiah: '',
+      //     poin: '',
+      //     desc: ''
+      //   });
+      // } catch (error) {
+      //   console.error('Error:', error);
+
+      //   // Penanganan kesalahan khusus
+      //   if (error.response && error.response.status === 401) {
+      //       // Menavigasi ke halaman login jika tidak terotorisasi
+      //       navigate('/login');
+      //       return; // Menghentikan eksekusi kode selanjutnya
+      //   }
+      //   // menampilakan response error used alert
+      //   setMsg(error.response.data.message);
+      //   setErrorAlert(true);
+      //   // hide alert after 2,5 second
+      //   setTimeout(() => {
+      //     setErrorAlert(false);
+      //   }, 2500);
+      // }
     }
   
     const style = {
@@ -133,19 +168,19 @@ function InputHadiah() {
               <form className='form-input-hadiah' encType="multipart/form-data" onSubmit={handleSubmit}>
                 <div class="mb-3">
                     <label for="formFile" class="form-label">Input Foto Barang</label>
-                    <input class="form-control" type="file" id="formFile" name="image" onChange={handleChange} value={formData.image} />
+                    <input class="form-control" type="file" id="formFile" name="image" onChange={handleChange} value={formData.image} required/>
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputNB" class="form-label">Nama Barang</label>
-                  <input class="form-control" type="text" name="nama_barang" onChange={handleChange} value={formData.nama_barang}  aria-label="default input example"/>
+                  <input class="form-control" type="text" name="nama_barang" onChange={handleChange} value={formData.nama_barang}  aria-label="default input example" required/>
                 </div>
                 <div class="mb-3">
                   <label for="exampleInputPoin"  class="form-label">Harga Hadiah</label>
-                  <input class="form-control" onChange={handleChange} type="text" name="harga_hadiah" value={formData.harga_hadiah} aria-label="default input example"/>
+                  <input class="form-control" onChange={handleChange} type="text" name="harga_hadiah" value={formData.harga_hadiah} aria-label="default input example" required/>
                 </div>
                 <div class="mb-3">
                     <label for="exampleFormControlTextarea1" class="form-label">Deskripsi Hadiah</label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="desc" onChange={handleChange} value={formData.desc}></textarea>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" name="desc" onChange={handleChange} value={formData.desc} required></textarea>
                 </div>
                 <button type="submit" class="btn" style={{width: "100%", fontSize: '22.5px', marginTop: '1rem', backgroundColor: '#006664', color: 'white'}}>Submit</button>
               </form>

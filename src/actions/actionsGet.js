@@ -1,10 +1,16 @@
 import axios from "axios";
-import { hadiahsSlice, usersSlice, hadiahsHasExchange, hadiahsHasExchangeSlice, LogoutSlice } from "../reducers/reducers";
+import { hadiahsSlice, usersSlice, hadiahsHasExchangeSlice, LogoutSlice, dataProsesHadiahSlice, prosesPoinSlice, adminBarangSlice, hadiahAdminSlice, pengajuanHadiahSlice, notaPengajuanPoinSlice } from "../reducers/reducers";
 
-export const {setLoadingUsers, fetchUsersSuccess, fetchUsersError } = usersSlice.actions;
-export const {setLoadingHadiahs, fetchHadiahsSuccess, fetchHadiahsError} = hadiahsSlice.actions;
-export const {setLoadingHadiahsHasExchange, fetchHadiahsHasExchangeSuccess, fetchHadiahsHasExchangeError} = hadiahsHasExchangeSlice.actions;
-export const {LogoutSuccess, LogoutError} = LogoutSlice.actions;
+const {setLoadingUsers, fetchUsersSuccess, fetchUsersError } = usersSlice.actions;
+const {setLoadingHadiahs, fetchHadiahsSuccess, fetchHadiahsError} = hadiahsSlice.actions;
+const {setLoadingHadiahsHasExchange, fetchHadiahsHasExchangeSuccess, fetchHadiahsHasExchangeError} = hadiahsHasExchangeSlice.actions;
+const {LogoutSuccess, LogoutError} = LogoutSlice.actions;
+const {fetchDataProsesHadiahSliceSuccess,  fetchDataProsesHadiahSliceError} = dataProsesHadiahSlice.actions;
+const {fetchProsesPoinSucces, fetchProsesPoinError} = prosesPoinSlice.actions;
+const {fetchBarangSuccess, fetchBarangError,  setLoadingBarang} = adminBarangSlice.actions;
+const {fetchHadiahAdminSuccess, fetchHadiahAdminError, fetchHadiahAdminLoading} = hadiahAdminSlice.actions;
+const {fetchPengajuanHadiahSuccess, fetchPengajuanHadiahError, setLoadingPengajuanHadiah} = pengajuanHadiahSlice.actions;
+const {fetchNotaPengajuanPoinSuccess, fetchNotaPengajuanPoinError, setLoadingNotaPengajuanPoin} = notaPengajuanPoinSlice.actions;
 
 export const fetchUsers = () => {
     return async (dispatch) => {
@@ -56,9 +62,109 @@ export const Logout = () => {
     return async (dispatch) => {
         try{
             const response = await axios.get('http://localhost:8080/access/berkahjaya/logout', {withCredentials: true})
+            console.log(response)
             dispatch(LogoutSuccess(response.data));
         } catch(error) {
             dispatch(LogoutError(error));
         } 
+    }
+}
+
+export const fetchDataProsesHadiah = () => {
+    return async (dispatch) => {
+        try{
+            const response = await axios.get('http://localhost:8080/customer/berkahjaya/user/proses/hadiah', { withCredentials: true})
+            dispatch(fetchDataProsesHadiahSliceSuccess(response.data));
+        } catch(error) {
+            dispatch( fetchDataProsesHadiahSliceError(error));
+        }
+    }
+}
+
+export const fetchDataProsesPoin = () => {
+    return async (dispatch) => {
+        try {
+            const response = await axios.get('http://localhost:8080/customer/berkahjaya/proses/poin/verify', {withCredentials: true})
+            dispatch(fetchProsesPoinSucces(response.data));
+        } catch(error) {
+            dispatch(fetchProsesPoinError(error));
+        }
+    }
+}
+
+export const fetchAdminBarang = () => {
+    return async (dispatch) =>  {
+        dispatch(setLoadingBarang(true));
+        try {
+            const response = await axios.get('http://localhost:8080/admin/berkahjaya/adminside/barang', {withCredentials: true});
+            const data = {
+                barang: response.data,
+                status: response.status,
+            };
+            dispatch(fetchBarangSuccess(data));
+        } catch(error) {
+            const data = {
+                error: error,
+                status: error.response.status,
+            };
+            dispatch(fetchBarangError(data));
+        } finally {
+            dispatch(setLoadingBarang(false));
+        }
+    }
+}
+
+export const fetchAdminHadiah = () => {
+    return async (dispatch) => {
+        dispatch(fetchHadiahAdminLoading(true));
+        try {
+            const response = await axios.get('http://localhost:8080/admin/berkahjaya/adminside/hadiah', {withCredentials: true})
+            dispatch(fetchHadiahAdminSuccess(response.data));
+        } catch(error) {
+            const response = {
+                error: error,
+                status: error.response.status,
+            }
+            dispatch(fetchHadiahAdminError(response));
+        } finally {
+            dispatch(fetchHadiahAdminLoading(false));
+        }
+    }
+}
+
+
+export const fetchPengajuanHadiah = () => {
+    return async (dispatch) => {
+        dispatch(setLoadingPengajuanHadiah(true));
+        try {
+            const response = await axios.get('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/hadiah', {withCredentials: true})
+            dispatch(fetchPengajuanHadiahSuccess(response.data));
+        } catch(error) {
+            const response = {
+                error: error,
+                status: error.response.status,
+            };
+            dispatch(fetchPengajuanHadiahError(response));
+        } finally {
+            dispatch(setLoadingPengajuanHadiah(false));
+        }
+    }
+}
+
+export const fetchNotaPengajuanPoin = () => {
+    return async (dispatch) => {
+        dispatch(setLoadingNotaPengajuanPoin(true));
+        try {
+            const response = await axios.get('http://localhost:8080/admin/berkahjaya/adminside/pengajuan/poin', {withCredentials: true})
+            dispatch(fetchNotaPengajuanPoinSuccess(response.data));
+        } catch(error){
+            const response = {
+                error: error.response,
+                status: error.response.status,
+            }
+            dispatch(fetchNotaPengajuanPoinError(response));
+        } finally {
+            dispatch(setLoadingNotaPengajuanPoin(false));
+        }
     }
 }
